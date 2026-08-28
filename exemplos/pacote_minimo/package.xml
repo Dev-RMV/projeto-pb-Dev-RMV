@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>pacote_minimo</name>
+  <version>0.1.0</version>
+  <description>Exemplo mínimo com boas práticas: publisher parametrizado + subscriber + launch</description>
+  <maintainer email="aluno@exemplo.com">Seu Nome</maintainer>
+  <license>MIT</license>
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <export><build_type>ament_python</build_type></export>
+</package>
