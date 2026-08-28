@@ -15,6 +15,7 @@ datasets/
 *.bag
 rosbag2*/
 *.mp4
+!ros2_ws/midia/demo.mp4
 *.zip
 .DS_Store
 Thumbs.db

@@ -9,7 +9,7 @@ disciplina: "PB Sistemas Robóticos 2026.2"
 turma: "GRPEDCR3C1-M1-P1"
 projeto: "Título do seu projeto"
 entregas:
-  tp1:   { entregue: false, branch: "entrega-tp1",   tag: "tp1",   video: "", data: "" }
+  tp1:   { entregue: false, branch: "entrega-tp1",   tag: "tp1",   video: "https://www.youtube.com/watch?v=WrpPA5194_8", data: "" }
   tp2:   { entregue: false, branch: "entrega-tp2",   tag: "tp2",   video: "", data: "" }
   tp3:   { entregue: false, branch: "entrega-tp3",   tag: "tp3",   video: "", data: "" }
   tp4:   { entregue: false, branch: "entrega-tp4",   tag: "tp4",   video: "", data: "" }

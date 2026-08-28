@@ -1,0 +1,23 @@
+# Faixas HSV no espaco do OpenCV: H 0-179, S 0-255, V 0-255.
+camera_publisher:
+  ros__parameters:
+    source: ""            # "0" = /dev/video0, ou caminho de video (o reproduzir.sh passa ros2_ws/midia/demo.mp4)
+    fps: 0.0              # 0 = FPS da fonte
+
+color_segmenter:
+  ros__parameters:
+    # lista de cores a segmentar; cada uma precisa de <cor>.lower e <cor>.upper ([H,S,V]).
+    # Se lower[H] > upper[H] a faixa "da a volta" pelo 0 (vermelho).
+    cores: ["azul", "vermelho", "verde", "amarelo"]
+    azul:     {lower: [100, 90, 60],  upper: [125, 255, 255]}   # bola e camiseta do demo.mp4
+    vermelho: {lower: [170, 100, 70], upper: [10, 255, 255]}
+    verde:    {lower: [35, 60, 40],   upper: [85, 255, 255]}
+    amarelo:  {lower: [20, 100, 100], upper: [35, 255, 255]}
+    # laranja: {lower: [5, 100, 70], upper: [20, 255, 255]}   # no demo.mp4 pega pele e o piso ao sol
+    min_area: 1500               # area minima (px) para contar como objeto
+    show: false
+
+face_features:
+  ros__parameters:
+    min_face_size: 30            # pixels
+    show: false

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Perfil Fast-DDS (rmw_fastrtps_cpp, padrao do ROS 2 Humble) para transporte de imagens grandes.
+
+  Problema: o transporte de memoria compartilhada (SHM) padrao do Fast-DDS usa segmento de
+  512 KB. Mensagens maiores (um frame 1280x720 bgr8 = 2,7 MB; 640x480 = 921 KB) caem para
+  UDP fragmentado e, com QoS best-effort, perdem fragmentos: medido 4-6 fps recebidos de
+  24 publicados no WSL2. Com segmento de 32 MB o mesmo pipeline recebe 24/24 fps.
+
+  Uso: o launch do pacote ja exporta FASTRTPS_DEFAULT_PROFILES_FILE apontando para este
+  arquivo. Para `ros2 run` manual:
+    export FASTRTPS_DEFAULT_PROFILES_FILE=$(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/fastdds_profile.xml
+  UDPv4 e mantido para descoberta e para nos/ferramentas em outros hosts ou sem o perfil.
+-->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>shm_grande</transport_id>
+      <type>SHM</type>
+      <segment_size>33554432</segment_size>
+    </transport_descriptor>
+    <transport_descriptor>
+      <transport_id>udp_padrao</transport_id>
+      <type>UDPv4</type>
+    </transport_descriptor>
+  </transport_descriptors>
+
+  <participant profile_name="participante_imagens" is_default_profile="true">
+    <rtps>
+      <userTransports>
+        <transport_id>shm_grande</transport_id>
+        <transport_id>udp_padrao</transport_id>
+      </userTransports>
+      <useBuiltinTransports>false</useBuiltinTransports>
+    </rtps>
+  </participant>
+</profiles>

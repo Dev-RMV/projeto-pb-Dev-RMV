@@ -6,7 +6,7 @@
 ## Vídeos por TP (formato fixo — não altere os marcadores)
 | TP | Link (YouTube/drive) | Testado em aba anônima |
 |---|---|---|
-| TP1 | <!-- PB:VIDEO-TP1 -->—<!-- /PB:VIDEO-TP1 --> | ⬜ |
+| TP1 | <!-- PB:VIDEO-TP1 -->https://www.youtube.com/watch?v=WrpPA5194_8<!-- /PB:VIDEO-TP1 --> | ⬜ |
 | TP2 | <!-- PB:VIDEO-TP2 -->—<!-- /PB:VIDEO-TP2 --> | ⬜ |
 | TP3 | <!-- PB:VIDEO-TP3 -->—<!-- /PB:VIDEO-TP3 --> | ⬜ |
 | TP4 | <!-- PB:VIDEO-TP4 -->—<!-- /PB:VIDEO-TP4 --> | ⬜ |

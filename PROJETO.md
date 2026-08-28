@@ -1,33 +1,33 @@
-# Proposta do Projeto — _Título do seu projeto_
+# Proposta do Projeto — Robô Sniper
 
-> Preencha no TP1 (fundamenta a escolha do projeto exigida no enunciado) e mantenha atualizado nos TPs seguintes.
+> _A proposta é fazer um robô que detecta "atira" em alvos (do estilo de competições de tiro).
 
 ## Objetivo e justificativa
-_O que o robô/sistema faz e por que isso é útil._
+_O objetivo é que o robô consiga navegar, detectar e "atirar" em alvos._
 
 ## Aplicação prática
-_Cenário real de uso._
+_Cenário de conflito armado e criação de memes._
 
 ## Funcionalidades previstas
-_Lista das capacidades (percepção, navegação, decisão…)._
+_Navegação com LIDAR e esteira do tipo "tanque", percepção com câmera e "atirar" um feixe de luz na mosca de um alvo detectado._
 
 ## Sensores e hardware (real ou simulado)
-_Câmera, lidar, profundidade, plataforma (Gazebo/MetaDrive/Raspberry Pi)…_
+_Câmera, lidar, emissor de luz, Raspberry Pi, bateria, esteira tipo "tanque"_
 
 ## Arquitetura prevista (ROS 2)
-_Nós, tópicos, serviços e ações planejados — pode começar como lista e evoluir para diagrama._
+_Nó cameraPub que publica dados de imagens, nó radar para o lidar que publica o que for mapeado, 2 nós motor que publicam dados dos motores e assinam um nó de controleMotor, nó processaImagem que assina de cameraPub, entre outros._
 
 ## Plano por TP
 | TP | O que será implementado neste projeto |
 |---|---|
-| TP1 | |
-| TP2 | |
-| TP3 | |
-| TP4 | |
-| TP5 | |
+| TP1 |Similação de detecção de rostos e objetos - sem detecção de alvo ainda|
+| TP2 |Não sei - cedo demais para dizer|
+| TP3 |Não sei - cedo demais para dizer|
+| TP4 |Não sei - cedo demais para dizer|
+| TP5 |Não sei - cedo demais para dizer|
 
 ## Riscos e alternativas
-_O que pode dar errado e o plano B._
+_Existe risco REAL E ALTO de complicações na parte mecânica, elétrica/eletrônica e de alimentação, além da falta de compreensão de como o hardware envolvido nesses três pilares funciona. Caso essas dificuldades não sejam superadas, o robô será simulado_
 
 ---
 

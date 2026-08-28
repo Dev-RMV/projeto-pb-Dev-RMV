@@ -1,0 +1,6 @@
+---
+int32  num_objects          # total de objetos segmentados no ultimo frame
+string[] colors             # nomes das cores configuradas
+int32[]  counts             # objetos por cor (mesma ordem de colors)
+uint64 frames_processed
+string message

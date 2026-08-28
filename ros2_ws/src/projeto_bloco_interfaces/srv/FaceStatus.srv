@@ -1,0 +1,4 @@
+---
+int32  num_faces            # rostos no ultimo frame
+uint64 frames_processed
+string message
