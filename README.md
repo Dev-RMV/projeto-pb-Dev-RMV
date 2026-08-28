@@ -3,11 +3,11 @@
 # METADADOS DO PROJETO — preencha os campos entre aspas. NÃO renomeie chaves.
 # Este bloco é lido automaticamente na correção/acompanhamento (YAML válido!).
 # ═══════════════════════════════════════════════════════════════════════
-aluno: "SEU NOME COMPLETO"
-github: "seu-usuario"
+aluno: "Rodrigo das Mercês Vianna"
+github: "Dev-RMV"
 disciplina: "PB Sistemas Robóticos 2026.2"
 turma: "GRPEDCR3C1-M1-P1"
-projeto: "Título do seu projeto"
+projeto: "Robô Sniper"
 entregas:
   tp1:   { entregue: false, branch: "entrega-tp1",   tag: "tp1",   video: "https://www.youtube.com/watch?v=WrpPA5194_8", data: "" }
   tp2:   { entregue: false, branch: "entrega-tp2",   tag: "tp2",   video: "", data: "" }
@@ -16,16 +16,16 @@ entregas:
   tp5:   { entregue: false, branch: "entrega-tp5",   tag: "tp5",   video: "", data: "" }
   final: { entregue: false, branch: "entrega-final", tag: "final", video: "", data: "" }
 ---
-# Projeto de Bloco: Sistemas Robóticos — <!-- PB:ALUNO -->Seu Nome Aqui<!-- /PB:ALUNO -->
+# Projeto de Bloco: Sistemas Robóticos — <!-- PB:ALUNO -->Rodrigo das Mercês Vianna<!-- /PB:ALUNO -->
 
 > ⚠️ **Entrega oficial = MOODLE** (ZIP de códigos + PDF + links). **A entrega no GitHub é COMPLEMENTAR e obrigatória** — não é opcional nem mero apoio: o professor corrige o código no estado da sua **branch/tag de entrega**, e a qualidade do repositório é critério de avaliação. Moodle **e** GitHub, sempre os dois. Repositório criado pelo GitHub Classroom.
 
 ## Identificação
-- **Nome:** <!-- PB:ALUNO --> _(preencha também no front-matter acima)_
+- **Nome:** <!-- PB:ALUNO --> _Rodrigo das Mercês Vianna_
 - **Usuário GitHub:** · **Disciplina:** PB Sistemas Robóticos (GRPEDCR3C1-M1-P1)
 
 ## Sobre o projeto
-_Título e descrição curta (2–3 frases). Proposta e planejamento completos: [PROJETO.md](PROJETO.md)._
+_Robô Sniper: O projeto pretende criar um robô que simula um tanque que atira em alvos (estilo os de competições), simulando um cenário de conflito. Para isso, o controle será feito em um grafo ROS2, usando sensores como lidar e câmera, e atuadores como motores e um emissor de luz, que irá acertar a mosca do alvo. Proposta e planejamento completos: [PROJETO.md](PROJETO.md)._
 
 ## Como compilar e executar (reprodutibilidade!)
 O professor corrige **executando** num clone limpo — mantenha isto funcionando a cada TP:
