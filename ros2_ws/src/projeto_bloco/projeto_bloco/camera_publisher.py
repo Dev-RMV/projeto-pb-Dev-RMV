@@ -2,8 +2,9 @@
 Publisher: captura frames de camera ou video com OpenCV e publica em /camera/image_raw.
 
 Parametros:
-  source  '0','1',... = indice de camera; caminho = arquivo de video (obrigatorio)
-  fps     taxa de publicacao (0 = a do video, ou 30 na camera)
+  source    '0','1',... = indice de camera; caminho = arquivo de video (obrigatorio)
+  fps       taxa de publicacao (0 = a do video, ou 30 na camera)
+  frame_id  frame da camera no header (camera_optical_link = frame optico do URDF)
 """
 
 import os
@@ -30,8 +31,10 @@ class CameraPublisher(Node):
         # dynamic_typing: `-p source:=0` chega como inteiro, `source:=video.mp4` como string
         self.declare_parameter('source', '', ParameterDescriptor(dynamic_typing=True))
         self.declare_parameter('fps', 0.0)
+        self.declare_parameter('frame_id', 'camera_optical_link')
         source = str(self.get_parameter('source').value).strip()
         fps = float(self.get_parameter('fps').value)
+        self.frame_id = self.get_parameter('frame_id').value
 
         self.is_camera = source.isdigit()
         if self.is_camera:
@@ -65,7 +68,7 @@ class CameraPublisher(Node):
             raise FimDaFonte()
         msg = self.bridge.cv2_to_imgmsg(frame, encoding='bgr8')
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'camera'
+        msg.header.frame_id = self.frame_id
         self.pub.publish(msg)
 
     def destroy_node(self):

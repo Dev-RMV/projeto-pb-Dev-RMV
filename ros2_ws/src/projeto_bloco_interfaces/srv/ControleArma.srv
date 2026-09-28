@@ -1,0 +1,7 @@
+# Trava de seguranca do emissor de luz.
+# Com a arma desarmada a action /engajar_alvo rejeita goals; desarmar aborta o engajamento em curso.
+bool armar             # true = armar, false = desarmar
+---
+bool sucesso
+bool armada            # estado depois do comando
+string mensagem

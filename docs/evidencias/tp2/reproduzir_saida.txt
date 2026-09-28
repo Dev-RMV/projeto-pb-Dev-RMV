@@ -1,0 +1,199 @@
+Starting >>> projeto_bloco_description
+Starting >>> projeto_bloco_interfaces
+Finished <<< projeto_bloco_description [1.13s]
+Finished <<< projeto_bloco_interfaces [6.26s]
+Starting >>> projeto_bloco
+Finished <<< projeto_bloco [0.94s]
+
+Summary: 3 packages finished [7.28s]
+[reproduzir] modelo: 22M /home/rmv/pb_repo_teste/ros2_ws/src/projeto_bloco/modelos/alvo_yolov8s_640.pt
+[reproduzir] sem DISPLAY: sem janelas nem RViz (imagens em /vision/rastreamento e /torre/visao)
+[reproduzir] nós:
+   /camera_publisher
+   /joint_state_publisher
+   /rastreador_yolo
+   /robot_state_publisher
+   /servidor_engajar
+[reproduzir] interfaces:
+   projeto_bloco_interfaces/msg/DeteccaoArray
+   projeto_bloco_interfaces/msg/DeteccaoObj
+   projeto_bloco_interfaces/msg/Face
+   projeto_bloco_interfaces/msg/FaceArray
+   projeto_bloco_interfaces/srv/ControleArma
+   projeto_bloco_interfaces/srv/FaceStatus
+   projeto_bloco_interfaces/srv/VisionStatus
+   projeto_bloco_interfaces/action/EngajarAlvo
+[reproduzir] action:
+   /engajar_alvo [projeto_bloco_interfaces/action/EngajarAlvo]
+[reproduzir] serviço:
+   /arma/controle [projeto_bloco_interfaces/srv/ControleArma]
+[reproduzir] log dos nós: ros2_ws/log/reproduzir.log
+
+[reproduzir] ===== 1) action client: engajar um alvo =====
+[INFO] [1790634343.936176894] [cliente_engajar]: /arma/controle: arma ARMADA: goals de /engajar_alvo liberados
+[INFO] [1790634343.936403179] [cliente_engajar]: [goal 1] enviando: classe="alvo"
+[INFO] [1790634343.937907844] [cliente_engajar]: [goal 1] aceito
+[INFO] [1790634343.940791047] [cliente_engajar]:   feedback   1: MIRANDO     10.0%  erro   59.4 px  pan   +2.3  tilt   -0.8  id   1  t= 0.0 s
+[INFO] [1790634344.041028234] [cliente_engajar]:   feedback   2: MIRANDO     31.2%  erro   35.9 px  pan   +3.6  tilt   -1.3  id   1  t= 0.1 s
+[INFO] [1790634344.141087040] [cliente_engajar]:   feedback   3: MIRANDO     43.7%  erro   22.0 px  pan   +4.4  tilt   -1.6  id   1  t= 0.2 s
+[INFO] [1790634344.241904607] [cliente_engajar]:   feedback   4: TRAVADO     50.0%  erro   13.5 px  pan   +4.8  tilt   -1.7  id   1  t= 0.3 s
+[INFO] [1790634344.342246522] [cliente_engajar]:   feedback   5: TRAVADO     60.0%  erro    8.5 px  pan   +5.1  tilt   -1.9  id   1  t= 0.4 s
+[INFO] [1790634344.445892087] [cliente_engajar]:   feedback   6: TRAVADO     70.4%  erro    5.3 px  pan   +5.2  tilt   -2.0  id   1  t= 0.5 s
+[INFO] [1790634344.541787078] [cliente_engajar]:   feedback   7: TRAVADO     80.0%  erro    3.5 px  pan   +5.2  tilt   -2.1  id   1  t= 0.6 s
+[INFO] [1790634344.642731168] [cliente_engajar]:   feedback   8: TRAVADO     90.1%  erro    2.4 px  pan   +5.2  tilt   -2.1  id   1  t= 0.7 s
+[INFO] [1790634344.741034128] [cliente_engajar]:   feedback   9: TRAVADO     99.9%  erro    1.9 px  pan   +5.2  tilt   -2.2  id   1  t= 0.8 s
+[INFO] [1790634344.841744450] [cliente_engajar]:   feedback  10: DISPARO    100.0%  erro    1.4 px  pan   +5.2  tilt   -2.3  id   1  t= 0.9 s
+[INFO] [1790634344.954277130] [cliente_engajar]: [goal 1] RESULT SUCESSO: DISPARO em alvo #1 com erro 1.4 px apos 0.9 s
+    disparou=True  alvo=alvo #1  feedbacks recebidos=10
+    duracao 1.00 s | 1a deteccao 0.00 s | disparo 0.90 s
+    ciclos 10 (com alvo 10) | erro medio 15.4 px, final 1.4 px | torre pan +5.2 tilt -2.3 graus
+[INFO] [1790634344.954745320] [cliente_engajar]: result registrado em /home/rmv/pb_repo_teste/ros2_ws/log/engajamentos.csv
+
+[reproduzir] ===== 2) action client: goal cancelado depois de 2 s =====
+[INFO] [1790634345.386118567] [cliente_engajar]: /arma/controle: arma ARMADA: goals de /engajar_alvo liberados
+[INFO] [1790634345.386351100] [cliente_engajar]: [goal 1] enviando: classe="alvo", cancelar apos 2.0 s
+[INFO] [1790634345.388104676] [cliente_engajar]: [goal 1] aceito
+[INFO] [1790634345.390511786] [cliente_engajar]:   feedback   1: TRAVADO     50.0%  erro    2.0 px  pan   +5.0  tilt   -2.4  id   1  t= 0.0 s
+[INFO] [1790634345.491039791] [cliente_engajar]:   feedback   2: TRAVADO     51.0%  erro    1.1 px  pan   +4.9  tilt   -2.5  id   1  t= 0.1 s
+[INFO] [1790634345.591189029] [cliente_engajar]:   feedback   3: TRAVADO     52.0%  erro    0.4 px  pan   +4.8  tilt   -2.6  id   1  t= 0.2 s
+[INFO] [1790634345.690643350] [cliente_engajar]:   feedback   4: TRAVADO     53.0%  erro    0.8 px  pan   +4.7  tilt   -2.7  id   1  t= 0.3 s
+[INFO] [1790634345.791066620] [cliente_engajar]:   feedback   5: TRAVADO     54.0%  erro    0.8 px  pan   +4.6  tilt   -2.7  id   1  t= 0.4 s
+[INFO] [1790634345.890762855] [cliente_engajar]:   feedback   6: TRAVADO     55.0%  erro    1.1 px  pan   +4.6  tilt   -2.8  id   1  t= 0.5 s
+[INFO] [1790634345.990882638] [cliente_engajar]:   feedback   7: TRAVADO     56.0%  erro    1.2 px  pan   +4.5  tilt   -2.8  id   1  t= 0.6 s
+[INFO] [1790634346.091136849] [cliente_engajar]:   feedback   8: TRAVADO     57.0%  erro    1.5 px  pan   +4.5  tilt   -2.8  id   1  t= 0.7 s
+[INFO] [1790634346.191061596] [cliente_engajar]:   feedback   9: TRAVADO     58.0%  erro    1.4 px  pan   +4.4  tilt   -2.9  id   1  t= 0.8 s
+[INFO] [1790634346.290795662] [cliente_engajar]:   feedback  10: TRAVADO     59.0%  erro    1.2 px  pan   +4.4  tilt   -2.9  id   1  t= 0.9 s
+[INFO] [1790634346.391180812] [cliente_engajar]:   feedback  11: TRAVADO     60.0%  erro    1.4 px  pan   +4.4  tilt   -2.9  id   1  t= 1.0 s
+[INFO] [1790634346.491124702] [cliente_engajar]:   feedback  12: TRAVADO     61.0%  erro    1.0 px  pan   +4.3  tilt   -3.0  id   1  t= 1.1 s
+[INFO] [1790634346.590884453] [cliente_engajar]:   feedback  13: TRAVADO     62.0%  erro    1.2 px  pan   +4.3  tilt   -3.0  id   1  t= 1.2 s
+[INFO] [1790634346.690773007] [cliente_engajar]:   feedback  14: TRAVADO     63.0%  erro    0.9 px  pan   +4.3  tilt   -3.0  id   1  t= 1.3 s
+[INFO] [1790634346.791150064] [cliente_engajar]:   feedback  15: TRAVADO     64.0%  erro    1.1 px  pan   +4.2  tilt   -3.1  id   1  t= 1.4 s
+[INFO] [1790634346.891026559] [cliente_engajar]:   feedback  16: TRAVADO     65.0%  erro    1.0 px  pan   +4.2  tilt   -3.1  id   1  t= 1.5 s
+[INFO] [1790634346.990987250] [cliente_engajar]:   feedback  17: TRAVADO     66.0%  erro    1.0 px  pan   +4.2  tilt   -3.2  id   1  t= 1.6 s
+[INFO] [1790634347.090733621] [cliente_engajar]:   feedback  18: TRAVADO     67.0%  erro    1.1 px  pan   +4.2  tilt   -3.2  id   1  t= 1.7 s
+[INFO] [1790634347.191025240] [cliente_engajar]:   feedback  19: TRAVADO     68.0%  erro    0.9 px  pan   +4.1  tilt   -3.3  id   1  t= 1.8 s
+[INFO] [1790634347.291167212] [cliente_engajar]:   feedback  20: TRAVADO     69.0%  erro    1.3 px  pan   +4.1  tilt   -3.2  id   1  t= 1.9 s
+[INFO] [1790634347.388995382] [cliente_engajar]: [goal 1] pedindo cancelamento
+[INFO] [1790634347.391295867] [cliente_engajar]:   feedback  21: TRAVADO     70.0%  erro    0.8 px  pan   +4.1  tilt   -3.3  id   1  t= 2.0 s
+[INFO] [1790634347.392131406] [cliente_engajar]: [goal 1] cancelamento aceito
+[INFO] [1790634347.492038247] [cliente_engajar]: [goal 1] RESULT CANCELADO: cancelado pelo cliente apos 2.1 s
+    disparou=False  alvo=alvo #1  feedbacks recebidos=21
+    duracao 2.10 s | 1a deteccao 0.00 s | disparo -1.00 s
+    ciclos 21 (com alvo 21) | erro medio 1.1 px, final 0.8 px | torre pan +4.1 tilt -3.3 graus
+[INFO] [1790634347.492478394] [cliente_engajar]: result registrado em /home/rmv/pb_repo_teste/ros2_ws/log/engajamentos.csv
+
+[reproduzir] ===== 3) parametros: YAML + alteracao dinamica =====
+[param] ===== 1. valores carregados do config/params.yaml pelo launch =====
+
+[param] $ ros2 param get /rastreador_yolo modelo
+    String value is: alvo_yolov8s_640.pt
+
+[param] $ ros2 param get /rastreador_yolo confianca
+    Double value is: 0.5
+
+[param] $ ros2 param get /rastreador_yolo frequencia_hz
+    Double value is: 10.0
+
+[param] $ ros2 param get /rastreador_yolo classes
+    String values are: ['alvo']
+[param] taxa medida de /vision/deteccoes:
+    average rate: 9.999
+    	min: 0.094s max: 0.109s std dev: 0.00253s window: 75
+
+[param] ===== 2. alteracao dinamica com ros2 param set =====
+
+[param] $ ros2 param set /rastreador_yolo confianca 0.7
+    Set parameter successful
+
+[param] $ ros2 param set /rastreador_yolo frequencia_hz 3.0
+    Set parameter successful
+[param] taxa medida de /vision/deteccoes:
+    average rate: 3.003
+    	min: 0.305s max: 0.367s std dev: 0.01303s window: 24
+
+[param] $ ros2 param set /rastreador_yolo imgsz 960
+    Set parameter successful
+
+[param] $ ros2 param set /rastreador_yolo classes ['*']
+    Set parameter successful
+
+[param] $ ros2 param set /rastreador_yolo modelo yolo11n.pt
+    Set parameter successful
+
+[param] $ ros2 param set /rastreador_yolo modelo alvo_yolov8s_640.pt
+    Set parameter successful
+
+[param] $ ros2 param set /rastreador_yolo classes ['alvo']
+    Set parameter successful
+
+[param] ===== 3. valores invalidos sao recusados =====
+
+[param] $ ros2 param set /rastreador_yolo confianca 1.5
+    Setting parameter failed: Parameter confianca out of range Min: 0.05, Max: 0.95, value: 1.5
+
+[param] $ ros2 param set /rastreador_yolo classes ['dragao']
+    Setting parameter failed: classes desconhecidas ['dragao']; exemplos validos: alvo ...
+
+[param] $ ros2 param set /rastreador_yolo modelo inexistente.pt
+    Setting parameter failed: [Errno 2] No such file or directory: '/home/rmv/.cache/projeto_bloco/modelos/inexistente.pt'
+
+[param] ===== 4. ros2 param load: perfil alternativo e volta ao YAML principal =====
+
+[param] $ ros2 param load /rastreador_yolo /home/rmv/pb_repo_teste/ros2_ws/install/projeto_bloco/share/projeto_bloco/config/params_economia.yaml
+    Set parameter confianca successful
+    Set parameter frequencia_hz successful
+    Set parameter imgsz successful
+    Set parameter kalman.sigma_z successful
+[param] taxa medida de /vision/deteccoes:
+    average rate: 2.001
+    	min: 0.492s max: 0.510s std dev: 0.00481s window: 16
+
+[param] $ ros2 param load /rastreador_yolo /home/rmv/pb_repo_teste/ros2_ws/install/projeto_bloco/share/projeto_bloco/config/params.yaml
+    Set parameter modelo successful
+    Set parameter pasta_modelos successful
+    Set parameter confianca successful
+    Set parameter iou successful
+    Set parameter frequencia_hz successful
+    Set parameter classes successful
+    Set parameter dispositivo successful
+    Set parameter imgsz successful
+    Set parameter threads_cpu successful
+    Set parameter kalman.sigma_a successful
+    Set parameter kalman.sigma_z successful
+    Set parameter trilha_max successful
+    Set parameter perda_max_s successful
+[param] taxa medida de /vision/deteccoes:
+    average rate: 10.002
+    	min: 0.093s max: 0.108s std dev: 0.00258s window: 75
+
+[param] ===== 5. estado final (ros2 param dump) =====
+
+[param] $ ros2 param dump /rastreador_yolo
+    /rastreador_yolo:
+      ros__parameters:
+        classes:
+        - alvo
+        confianca: 0.5
+        dispositivo: cpu
+        frequencia_hz: 10.0
+        imgsz: 640
+        iou: 0.5
+        kalman:
+          sigma_a: 200.0
+          sigma_z: 15.0
+        modelo: alvo_yolov8s_640.pt
+        pasta_modelos: ~/.cache/projeto_bloco/modelos
+        perda_max_s: 1.0
+        show: false
+        threads_cpu: 4
+        trilha_max: 40
+        use_sim_time: false
+    
+
+[reproduzir] results registrados em /home/rmv/pb_repo_teste/ros2_ws/log/engajamentos.csv
+
+[reproduzir] sistema no ar (Ctrl+C encerra). Em outro terminal: source ros2_ws/ambiente.sh
+   ros2 run projeto_bloco cliente_engajar
+   ros2 action send_goal /engajar_alvo projeto_bloco_interfaces/action/EngajarAlvo "{classe: 'alvo'}" --feedback
+
+[reproduzir] encerrando

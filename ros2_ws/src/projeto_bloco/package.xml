@@ -2,8 +2,8 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>projeto_bloco</name>
-  <version>1.0.0</version>
-  <description>Publisher de camera/video, segmentacao HSV, deteccao de rostos e features</description>
+  <version>2.0.0</version>
+  <description>Robo Sniper: camera, segmentacao HSV, rostos (TP1); rastreamento YOLO + Kalman e action de engajamento (TP2)</description>
   <maintainer email="rmv@todo.todo">rmv</maintainer>
   <license>MIT</license>
 
@@ -12,11 +12,18 @@
   <depend>cv_bridge</depend>
   <depend>rcl_interfaces</depend>
   <depend>projeto_bloco_interfaces</depend>
+  <exec_depend>action_msgs</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
+  <exec_depend>projeto_bloco_description</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <!-- ultralytics (YOLO) + torch: pip no venv ros2_ws/.venv (scripts/setup.sh), nao ha pacote rosdep -->
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

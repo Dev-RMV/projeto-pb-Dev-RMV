@@ -1,0 +1,11 @@
+# Dependencias Python do rastreador YOLO (TP2), instaladas pelo scripts/setup.sh no venv
+# ros2_ws/.venv (o ROS 2 continua no Python do sistema; o venv entra no PYTHONPATH pelo
+# ros2_ws/ambiente.sh). Versoes fixas = as testadas em 28/09/2026.
+#   ros2_ws/.venv/bin/pip install -r requirements.txt
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0+cpu            # build so CPU (~200 MB); GPU: ver README do pacote
+torchvision==0.29.0+cpu
+ultralytics==8.4.164         # YOLO11 + ByteTrack
+numpy==1.26.4                # < 2: o cv_bridge do Humble foi compilado com numpy 1.x
+opencv-python==4.11.0.86     # 4.12+ exige numpy 2
+lap==0.5.13                  # associacao do ByteTrack (evita o ultralytics instalar sozinho)

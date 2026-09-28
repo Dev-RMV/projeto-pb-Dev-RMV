@@ -1,0 +1,34 @@
+# Engajar um alvo: girar a torre (pan/tilt) ate a mira ficar sobre o alvo e "disparar" o emissor
+# de luz depois de tempo_travar_s seguidos com erro <= tolerancia_px.
+# Campos numericos do goal com valor 0 usam o padrao do servidor (params.yaml).
+
+# ---------- goal ----------
+string classe                  # classe YOLO do alvo (ex.: "alvo"); "" = qualquer classe
+float32 confianca_min          # ignora deteccoes com confianca menor
+float32 tolerancia_px          # erro de mira aceito como "travado"
+float32 tempo_travar_s         # tempo seguido travado para disparar
+float32 tempo_max_s            # desiste depois disso
+---
+# ---------- result (metricas) ----------
+bool disparou
+string mensagem
+int32 id_alvo                  # id do rastreador do alvo engajado (-1 = nenhum)
+string classe
+float32 duracao_s              # do aceite do goal ate o fim
+float32 tempo_ate_deteccao_s   # ate ver o alvo pela 1a vez (-1 = nunca viu)
+float32 tempo_ate_disparo_s    # -1 = nao disparou
+uint32 ciclos                  # iteracoes do laco de controle
+uint32 ciclos_com_alvo
+float32 erro_medio_px          # media do erro de mira nos ciclos com alvo
+float32 erro_final_px
+float32 pan_final_graus
+float32 tilt_final_graus
+---
+# ---------- feedback (a cada ciclo de controle) ----------
+string estado                  # PROCURANDO | MIRANDO | TRAVADO | DISPARO
+float32 progresso              # 0..1: PROCURANDO 0; MIRANDO 0.1-0.5 (erro caindo); TRAVADO 0.5-1
+int32 id_alvo
+float32 erro_px
+float32 pan_graus
+float32 tilt_graus
+float32 tempo_decorrido_s

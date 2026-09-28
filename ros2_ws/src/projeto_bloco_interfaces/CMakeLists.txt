@@ -15,6 +15,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/FaceArray.msg"
   "srv/VisionStatus.srv"
   "srv/FaceStatus.srv"
+  "msg/DeteccaoObj.msg"
+  "msg/DeteccaoArray.msg"
+  "srv/ControleArma.srv"
+  "action/EngajarAlvo.action"
   DEPENDENCIES builtin_interfaces std_msgs
 )
 

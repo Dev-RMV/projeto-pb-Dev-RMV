@@ -1,0 +1,11 @@
+# Perfil alternativo do rastreador para carregar em execucao (demonstracao de parametros dinamicos):
+#   ros2 param load /rastreador_yolo $(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/params_economia.yaml
+# Menos CPU: 2 Hz, limiar mais alto, entrada menor (perde alvos pequenos). Para voltar ao normal:
+#   ros2 param load /rastreador_yolo .../config/params.yaml
+/rastreador_yolo:
+  ros__parameters:
+    confianca: 0.7
+    frequencia_hz: 2.0
+    imgsz: 416
+    kalman:
+      sigma_z: 25.0

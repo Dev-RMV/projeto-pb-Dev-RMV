@@ -1,0 +1,269 @@
+<?xml version="1.0"?>
+<!--
+  Robo Sniper: esteira tipo tanque (2 motores), camera, lidar e torre pan/tilt com emissor de luz.
+
+  Arvore de frames (REP 103: x frente, y esquerda, z cima; REP 105: base_footprint no chao):
+    base_footprint -> base_link (chassi; origem na altura dos eixos das rodas)
+      base_link -> esteira_{esq,dir}_link       lagarta (visual), fixa
+      base_link -> roda_motriz_{esq,dir}_link   traseiras, uma por motor      (continuous)
+      base_link -> roda_guia_{esq,dir}_link     dianteiras, levadas pela lagarta (continuous)
+      base_link -> camera_link -> camera_optical_link   (optico: z frente, x direita, y baixo)
+      base_link -> mastro_link -> lidar_link
+      base_link -> torre_pan_link   (torre_pan_joint, revolute em z: + = gira para a esquerda)
+        torre_pan_link -> torre_tilt_link  (torre_tilt_joint, revolute em y: + = cano para baixo)
+          torre_tilt_link -> emissor_link  (ponta do cano: origem do feixe de luz)
+
+  Medidas em metros (robo pequeno com Raspberry Pi); massas aproximadas, so para o Gazebo.
+  Sensores e acionamento simulados (Gazebo Classic 11): robo_sniper.gazebo.xacro.
+  Conferir:  xacro robo_sniper.urdf.xacro > /tmp/robo.urdf && check_urdf /tmp/robo.urdf
+-->
+<robot name="robo_sniper" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===================== medidas ===================== -->
+  <xacro:property name="PI" value="3.14159265359"/>
+  <xacro:property name="chassi_c" value="0.26"/>     <!-- comprimento (x) -->
+  <xacro:property name="chassi_l" value="0.14"/>     <!-- largura (y) -->
+  <xacro:property name="chassi_a" value="0.07"/>     <!-- altura (z) -->
+  <xacro:property name="chassi_z" value="0.02"/>     <!-- centro do chassi acima dos eixos -->
+  <xacro:property name="chassi_m" value="1.2"/>
+  <xacro:property name="roda_r" value="0.035"/>
+  <xacro:property name="roda_e" value="0.04"/>       <!-- espessura da roda = largura da lagarta -->
+  <xacro:property name="roda_m" value="0.08"/>
+  <xacro:property name="entre_eixos" value="0.20"/>  <!-- roda guia (frente) ate roda motriz (tras) -->
+  <xacro:property name="bitola" value="0.19"/>       <!-- entre os centros das duas esteiras -->
+  <xacro:property name="topo_z" value="${chassi_z + chassi_a / 2}"/>   <!-- tampa do chassi -->
+  <xacro:property name="cano_c" value="0.14"/>       <!-- comprimento do cano do emissor -->
+  <xacro:property name="mastro_a" value="0.175"/>    <!-- lidar acima da torre, mesmo com o cano erguido -->
+
+  <!-- ===================== materiais ===================== -->
+  <material name="verde_militar"><color rgba="0.33 0.38 0.22 1"/></material>
+  <material name="cinza_escuro"><color rgba="0.18 0.18 0.18 1"/></material>
+  <material name="borracha"><color rgba="0.05 0.05 0.05 1"/></material>
+  <material name="metal"><color rgba="0.55 0.55 0.58 1"/></material>
+  <material name="vermelho"><color rgba="0.85 0.05 0.05 1"/></material>
+  <material name="azul"><color rgba="0.1 0.25 0.8 1"/></material>
+
+  <!-- ===================== macros de inercia ===================== -->
+  <xacro:macro name="inercia_caixa" params="m x y z *origin">
+    <inertial>
+      <xacro:insert_block name="origin"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m * (y * y + z * z) / 12}" ixy="0" ixz="0"
+               iyy="${m * (x * x + z * z) / 12}" iyz="0" izz="${m * (x * x + y * y) / 12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- cilindro com eixo em z do frame dado por origin -->
+  <xacro:macro name="inercia_cilindro" params="m r h *origin">
+    <inertial>
+      <xacro:insert_block name="origin"/>
+      <mass value="${m}"/>
+      <inertia ixx="${m * (3 * r * r + h * h) / 12}" ixy="0" ixz="0"
+               iyy="${m * (3 * r * r + h * h) / 12}" iyz="0" izz="${m * r * r / 2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ===================== chassi ===================== -->
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 ${chassi_z}"/>
+      <geometry><box size="${chassi_c} ${chassi_l} ${chassi_a}"/></geometry>
+      <material name="verde_militar"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${chassi_z}"/>
+      <geometry><box size="${chassi_c} ${chassi_l} ${chassi_a}"/></geometry>
+    </collision>
+    <xacro:inercia_caixa m="${chassi_m}" x="${chassi_c}" y="${chassi_l}" z="${chassi_a}">
+      <origin xyz="0 0 ${chassi_z}"/>
+    </xacro:inercia_caixa>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${roda_r}"/>
+  </joint>
+
+  <!-- ===================== esteiras ===================== -->
+  <!-- lado: 1 = esquerda (+y), -1 = direita (-y) -->
+  <xacro:macro name="roda" params="nome lado x">
+    <link name="${nome}_link">
+      <visual>
+        <origin rpy="${PI / 2} 0 0"/>
+        <geometry><cylinder radius="${roda_r}" length="${roda_e}"/></geometry>
+        <material name="borracha"/>
+      </visual>
+      <collision>
+        <origin rpy="${PI / 2} 0 0"/>
+        <geometry><cylinder radius="${roda_r}" length="${roda_e}"/></geometry>
+      </collision>
+      <xacro:inercia_cilindro m="${roda_m}" r="${roda_r}" h="${roda_e}">
+        <origin rpy="${PI / 2} 0 0"/>
+      </xacro:inercia_cilindro>
+    </link>
+    <joint name="${nome}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${nome}_link"/>
+      <origin xyz="${x} ${lado * bitola / 2} 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- lagarta: caixa entre os eixos; com as rodas nas pontas forma o contorno da esteira -->
+  <xacro:macro name="esteira" params="lado nome">
+    <link name="esteira_${nome}_link">
+      <visual>
+        <geometry><box size="${entre_eixos} ${roda_e + 0.004} ${2 * roda_r}"/></geometry>
+        <material name="cinza_escuro"/>
+      </visual>
+      <xacro:inercia_caixa m="0.1" x="${entre_eixos}" y="${roda_e}" z="${2 * roda_r}">
+        <origin/>
+      </xacro:inercia_caixa>
+    </link>
+    <joint name="esteira_${nome}_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="esteira_${nome}_link"/>
+      <origin xyz="0 ${lado * bitola / 2} 0"/>
+    </joint>
+    <xacro:roda nome="roda_motriz_${nome}" lado="${lado}" x="${-entre_eixos / 2}"/>
+    <xacro:roda nome="roda_guia_${nome}" lado="${lado}" x="${entre_eixos / 2}"/>
+  </xacro:macro>
+
+  <xacro:esteira lado="1" nome="esq"/>
+  <xacro:esteira lado="-1" nome="dir"/>
+
+  <!-- ===================== camera (frente do chassi) ===================== -->
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="0.02 0.06 0.03"/></geometry>
+      <material name="cinza_escuro"/>
+    </visual>
+    <visual>
+      <origin xyz="0.011 0 0" rpy="0 ${PI / 2} 0"/>
+      <geometry><cylinder radius="0.008" length="0.004"/></geometry>
+      <material name="azul"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.02 0.06 0.03"/></geometry>
+    </collision>
+    <xacro:inercia_caixa m="0.03" x="0.02" y="0.06" z="0.03"><origin/></xacro:inercia_caixa>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${chassi_c / 2 + 0.01} 0 ${chassi_z}"/>
+  </joint>
+
+  <link name="camera_optical_link"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_link"/>
+    <origin rpy="${-PI / 2} 0 ${-PI / 2}"/>
+  </joint>
+
+  <!-- ===================== lidar (mastro na traseira) ===================== -->
+  <link name="mastro_link">
+    <visual>
+      <origin xyz="0 0 ${mastro_a / 2}"/>
+      <geometry><cylinder radius="0.008" length="${mastro_a}"/></geometry>
+      <material name="metal"/>
+    </visual>
+    <xacro:inercia_cilindro m="0.03" r="0.008" h="${mastro_a}">
+      <origin xyz="0 0 ${mastro_a / 2}"/>
+    </xacro:inercia_cilindro>
+  </link>
+  <joint name="mastro_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="mastro_link"/>
+    <origin xyz="${-chassi_c / 2 + 0.04} 0 ${topo_z}"/>
+  </joint>
+
+  <link name="lidar_link">
+    <visual>
+      <geometry><cylinder radius="0.035" length="0.04"/></geometry>
+      <material name="cinza_escuro"/>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.035" length="0.04"/></geometry>
+    </collision>
+    <xacro:inercia_cilindro m="0.17" r="0.035" h="0.04"><origin/></xacro:inercia_cilindro>
+  </link>
+  <joint name="lidar_joint" type="fixed">
+    <parent link="mastro_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 ${mastro_a + 0.02}"/>
+  </joint>
+
+  <!-- ===================== torre pan/tilt com o emissor de luz ===================== -->
+  <link name="torre_pan_link">
+    <visual>
+      <origin xyz="0 0 0.015"/>
+      <geometry><cylinder radius="0.045" length="0.03"/></geometry>
+      <material name="verde_militar"/>
+    </visual>
+    <visual>   <!-- suportes do eixo de tilt -->
+      <origin xyz="0 0 0.045"/>
+      <geometry><box size="0.03 0.07 0.03"/></geometry>
+      <material name="metal"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.015"/>
+      <geometry><cylinder radius="0.045" length="0.03"/></geometry>
+    </collision>
+    <xacro:inercia_cilindro m="0.15" r="0.045" h="0.03">
+      <origin xyz="0 0 0.015"/>
+    </xacro:inercia_cilindro>
+  </link>
+  <joint name="torre_pan_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="torre_pan_link"/>
+    <origin xyz="0.02 0 ${topo_z}"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="${-170 * PI / 180}" upper="${170 * PI / 180}" effort="1.0" velocity="3.14"/>
+    <dynamics damping="0.05" friction="0.01"/>
+  </joint>
+
+  <link name="torre_tilt_link">
+    <visual>   <!-- bloco do emissor -->
+      <geometry><box size="0.05 0.045 0.04"/></geometry>
+      <material name="verde_militar"/>
+    </visual>
+    <visual>   <!-- cano -->
+      <origin xyz="${cano_c / 2} 0 0" rpy="0 ${PI / 2} 0"/>
+      <geometry><cylinder radius="0.012" length="${cano_c}"/></geometry>
+      <material name="metal"/>
+    </visual>
+    <collision>
+      <geometry><box size="0.05 0.045 0.04"/></geometry>
+    </collision>
+    <!-- centro de massa no eixo de tilt (torre balanceada): no Gazebo o cano nao cai sozinho -->
+    <xacro:inercia_caixa m="0.1" x="${cano_c}" y="0.045" z="0.04"><origin/></xacro:inercia_caixa>
+  </link>
+  <joint name="torre_tilt_joint" type="revolute">
+    <parent link="torre_pan_link"/>
+    <child link="torre_tilt_link"/>
+    <origin xyz="0 0 0.055"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="${-40 * PI / 180}" upper="${20 * PI / 180}" effort="1.0" velocity="3.14"/>
+    <dynamics damping="0.05" friction="0.01"/>
+  </joint>
+
+  <link name="emissor_link">
+    <visual>   <!-- lente do emissor -->
+      <origin rpy="0 ${PI / 2} 0"/>
+      <geometry><cylinder radius="0.013" length="0.006"/></geometry>
+      <material name="vermelho"/>
+    </visual>
+  </link>
+  <joint name="emissor_joint" type="fixed">
+    <parent link="torre_tilt_link"/>
+    <child link="emissor_link"/>
+    <origin xyz="${cano_c} 0 0"/>
+  </joint>
+
+  <xacro:include filename="robo_sniper.gazebo.xacro"/>
+
+</robot>

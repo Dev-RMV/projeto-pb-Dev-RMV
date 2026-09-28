@@ -10,7 +10,7 @@ turma: "GRPEDCR3C1-M1-P1"
 projeto: "Robô Sniper"
 entregas:
   tp1:   { entregue: false, branch: "entrega-tp1",   tag: "tp1",   video: "https://www.youtube.com/watch?v=WrpPA5194_8", data: "" }
-  tp2:   { entregue: false, branch: "entrega-tp2",   tag: "tp2",   video: "", data: "" }
+  tp2:   { entregue: false, branch: "entrega-tp2",   tag: "tp2",   video: "https://youtu.be/VQyR84piW8Q", data: "" }
   tp3:   { entregue: false, branch: "entrega-tp3",   tag: "tp3",   video: "", data: "" }
   tp4:   { entregue: false, branch: "entrega-tp4",   tag: "tp4",   video: "", data: "" }
   tp5:   { entregue: false, branch: "entrega-tp5",   tag: "tp5",   video: "", data: "" }
@@ -33,6 +33,7 @@ O professor corrige **executando** num clone limpo — mantenha isto funcionando
 ./scripts/setup.sh        # dependências além do setup padrão da disciplina
 ./scripts/reproduzir.sh   # compila, obtém/gera artefatos e roda a demo do TP corrente
 ```
+Demo atual (TP2): detecção de alvos de tiro (YOLOv8s treinado) com rastreamento e filtro de Kalman, action de engajamento (servidor + cliente), parâmetros dinâmicos e URDF no RViz. Comandos manuais e detalhes: [`ros2_ws/src/projeto_bloco/README.md`](ros2_ws/src/projeto_bloco/README.md).
 
 ## Fluxo de branches (leia o [consulta/git.md](consulta/git.md))
 - **`main`** — estado atual e estável do projeto (evolui TP a TP; sempre compilável).

@@ -1,0 +1,3 @@
+data_hora,goal,classe_pedida,status,feedbacks,disparou,mensagem,id_alvo,classe,duracao_s,tempo_ate_deteccao_s,tempo_ate_disparo_s,ciclos,ciclos_com_alvo,erro_medio_px,erro_final_px,pan_final_graus,tilt_final_graus
+2026-09-28T19:25:44,1,alvo,SUCESSO,10,True,DISPARO em alvo #1 com erro 1.4 px apos 0.9 s,1,alvo,1.001,0.0,0.901,10,10,15.368,1.373,5.178,-2.257
+2026-09-28T19:25:47,1,alvo,CANCELADO,21,False,cancelado pelo cliente apos 2.1 s,1,alvo,2.1,0.0,-1.0,21,21,1.106,0.769,4.086,-3.295

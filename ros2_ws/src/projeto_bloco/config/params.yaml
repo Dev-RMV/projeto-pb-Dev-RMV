@@ -1,10 +1,17 @@
-# Faixas HSV no espaco do OpenCV: H 0-179, S 0-255, V 0-255.
-camera_publisher:
-  ros__parameters:
-    source: ""            # "0" = /dev/video0, ou caminho de video (o reproduzir.sh passa ros2_ws/midia/demo.mp4)
-    fps: 0.0              # 0 = FPS da fonte
+# Parametros de todos os nos do projeto_bloco (carregados pelos launch files).
+# Em execucao:  ros2 param set /no nome valor   |   ros2 param load /no este_arquivo.yaml
+# (parametro double exige ponto decimal na linha de comando: 5.0, nao 5)
+# Nomes dos nos com a barra inicial (/no): o `ros2 param load` do Humble so aceita o nome completo.
 
-color_segmenter:
+/camera_publisher:
+  ros__parameters:
+    source: ""            # "0" = /dev/video0, ou caminho de video (TP2: ros2_ws/midia/alvos_dv20.mp4)
+    fps: 0.0              # 0 = FPS da fonte
+    frame_id: "camera_optical_link"   # frame da camera no URDF
+
+# ---------- TP1: segmentacao por cor e rostos ----------
+# Faixas HSV no espaco do OpenCV: H 0-179, S 0-255, V 0-255.
+/color_segmenter:
   ros__parameters:
     # lista de cores a segmentar; cada uma precisa de <cor>.lower e <cor>.upper ([H,S,V]).
     # Se lower[H] > upper[H] a faixa "da a volta" pelo 0 (vermelho).
@@ -17,7 +24,60 @@ color_segmenter:
     min_area: 1500               # area minima (px) para contar como objeto
     show: false
 
-face_features:
+/face_features:
   ros__parameters:
     min_face_size: 30            # pixels
     show: false
+
+# ---------- TP2: rastreamento de alvos (YOLO) + action de engajamento ----------
+/rastreador_yolo:
+  ros__parameters:
+    # YOLOv8s treinado para a classe "alvo" (alvo de tiro impresso; dataset sintetico no Blender).
+    # Nome sem caminho: procurado em share/projeto_bloco/modelos e senao em pasta_modelos, onde os
+    # pesos oficiais da Ultralytics (ex.: yolo11n.pt, COCO) sao baixados na 1a vez; ou um caminho.
+    modelo: "alvo_yolov8s_640.pt"
+    pasta_modelos: "~/.cache/projeto_bloco/modelos"
+    confianca: 0.5               # limiar de confianca (0.05-0.95); melhor F1 na validacao: 0.57
+    iou: 0.5                     # limiar de IoU da supressao de nao-maximos
+    frequencia_hz: 10.0          # inferencia + publicacao de /vision/deteccoes (0.5-30)
+    classes: ["alvo"]            # nomes de classe do modelo; ["*"] = todas
+    dispositivo: "cpu"           # "cuda:0" exige torch com CUDA (o setup.sh instala o de CPU)
+    imgsz: 640                   # o modelo foi treinado com 640
+    threads_cpu: 4               # threads do torch (16+ disputam CPU com os outros nos)
+    kalman:
+      sigma_a: 200.0             # ruido de aceleracao (px/s^2): maior = segue mais rapido
+      sigma_z: 15.0              # ruido de medicao (px): maior = trilha mais suave
+    trilha_max: 40               # pontos por trilha desenhada
+    perda_max_s: 1.0             # id sem deteccao por mais que isso e descartado
+    # show (janela cv2.imshow) vem do argumento show:= do launch
+
+/servidor_engajar:
+  ros__parameters:
+    taxa_controle_hz: 10.0       # ciclos de controle e de feedback por segundo
+    hfov_graus: 70.0             # campo de visao horizontal da camera (DV20 / video de alvos)
+    kp: 4.0                      # ganho proporcional da torre (1/s)
+    vel_max_graus_s: 90.0        # velocidade maxima das juntas pan e tilt
+    pan_limite_graus: 170.0      # limites iguais aos do URDF
+    tilt_min_graus: -40.0        # tilt negativo = cano para cima
+    tilt_max_graus: 20.0
+    tempo_perda_s: 0.5           # alvo sumido ha menos que isso: segue a predicao do Kalman
+    # padroes para campos do goal enviados como 0
+    confianca_min: 0.5
+    tolerancia_px: 15.0
+    tempo_travar_s: 0.5
+    tempo_max_s: 30.0
+    armada_inicial: false        # trava de seguranca: comeca desarmada (/arma/controle arma)
+    taxa_visao_hz: 10.0          # publicacao de /torre/visao
+    # show (janela cv2.imshow com a mira) vem do argumento show:= do launch
+
+/cliente_engajar:
+  ros__parameters:
+    classes: ["alvo"]            # um goal por item, em sequencia
+    confianca_min: 0.0           # campos do goal; 0 = padrao do servidor
+    tolerancia_px: 0.0
+    tempo_travar_s: 0.0
+    tempo_max_s: 0.0
+    cancelar_apos_s: 0.0         # > 0: cancela cada goal depois desse tempo
+    armar: true                  # chama /arma/controle antes dos goals
+    intervalo_s: 2.0
+    arquivo_csv: ""              # "" = so log

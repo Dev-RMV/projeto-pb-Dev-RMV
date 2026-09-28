@@ -2,5 +2,22 @@
 
 > Entradas curtas e datadas: o que fiz, o que travou, como resolvi. Vira insumo direto dos relatórios (seção "problemas e soluções") e pesa a favor na avaliação de processo.
 
-## AAAA-MM-DD
-- 
+## 2026-09-28 (TP2, à noite) — troca para o detector de alvos
+- **Feito:** o robô passou a detectar alvos de tiro com o YOLOv8s treinado no projeto `C:\_fotos` (classe `alvo`). Copiei o `best.pt` como `projeto_bloco/modelos/alvo_yolov8s_640.pt` e o vídeo `alvos_dv20.mp4` para `ros2_ws/midia/`; o `_fotos` ficou intacto. O dataset não foi copiado.
+- **Teste no vídeo:** os 5 alvos detectados com confiança ≥ 0,72; ~54 ms por quadro na CPU (4 threads); goal com DISPARO em 0,8 s e 1 px de erro.
+- **Ajustes:** Kalman recalibrado para câmera que vibra e gira (`sigma_a` 200); `hfov_graus` 70, que é o campo de visão da câmera do vídeo; na demo de parâmetros, `classes ['person']` virou `imgsz 960` e troca de modelo alvos → YOLO11n → alvos, porque o COCO não tem a classe `alvo` (antes da troca, `classes ['*']`).
+
+## 2026-09-28 (TP2)
+- **Feito:** interfaces novas (`DeteccaoObj`, `DeteccaoArray`, `ControleArma`, `EngajarAlvo`) conferidas com `ros2 interface list`; nó `rastreador_yolo` (YOLO11n + ByteTrack + Kalman); action server e client de engajamento (mira da torre + disparo, com feedback, cancelamento e result com métricas em CSV); todos os parâmetros em `params.yaml`, com mudança em execução (`ros2 param set/load`); URDF do robô (RViz + Gazebo 11 com câmera, lidar e esteiras); `setup.sh`/`reproduzir.sh` do TP2; testes de estilo (`colcon test`) passando.
+- **Ambiente:** o `~/pb_ws` do WSL tinha a versão de antes do repositório. Fiz backup (`~/pb_ws_backup_20260928.tgz`) e passei a espelhar nele o `ros2_ws` do repo, convertendo CRLF→LF, porque o checkout do Windows usa `core.autocrlf`.
+- **Problema:** `pip install ultralytics` puxou numpy 2, que quebra o `cv_bridge` do Humble. **Solução:** venv com versões fixas (numpy 1.26, opencv-python 4.11) e o venv antes do Python do sistema no PYTHONPATH (`ros2_ws/ambiente.sh`).
+- **Problema:** o `yolo26n` não detectou a bola do vídeo. **Solução:** `yolo11n` (testei os dois no vídeo inteiro).
+- **Problema:** o Kalman quase não suavizava (-6% de rugosidade). **Solução:** gravei as trilhas do vídeo e testei 16 combinações de ruído; escolhi `sigma_a` 100 e `sigma_z` 15 (-28% na bola, -42% nas pessoas).
+- **Problema:** a torre não travava na bola (erro médio de 25 px e timeout de 20 s). **Solução:** feedforward da velocidade estimada pelo Kalman no controle; depois disso, 6/6 goals dispararam.
+- **Problema:** com o alvo sumido, a predição continuava a queda depois do quique e a mira “travava” no vazio. **Solução:** extrapolação limitada a 0,25 s e disparo só com o alvo visível.
+- **Problema:** `ValueError: Logger severity cannot be changed between calls` no result do 2º goal. **Solução:** o rclpy fixa a severidade por linha de código; separei `info` e `warn` em chamadas diferentes.
+- **Problema:** com `show:=true`, o `/arma/controle` não respondia e todos os goals eram rejeitados. **Solução:** o `cv2.imshow` (Qt) chamado das threads do `MultiThreadedExecutor` travava o grupo de callbacks; a janela passou para a thread principal e o executor para uma thread própria.
+- **Problema:** o RViz assinava `/torre/visao` como *reliable* e o nó publicava *best effort* (QoS incompatível, imagem vazia). **Solução:** as imagens de visualização passaram a ser publicadas com QoS confiável, que atende os dois tipos de assinante.
+- **Problema:** `ros2 param load` respondia “Param file does not contain parameters for /rastreador_yolo”. **Solução:** nós como `/nome:` no YAML. Outro detalhe: o `load` reenvia todos os valores, e o nó recarregava o modelo 3 vezes. Agora ele só reage ao que mudou.
+- **Problema (em aberto):** a cada ~34 s o `/camera/image_raw` fica ~2,5 s sem chegar aos assinantes. Por isso o rastreador e a mira param por esse tempo, e na demo de parâmetros o `ros2 topic hz` às vezes mostra média menor (máx de ~2 s na linha min/max). **Investigação:** o publicador não trava (cronometrei leitura, conversão e `publish()`, todos < 0,3 s), o vídeo lê sem pausas e um laço Python puro no WSL também não pausa. Os quadros são publicados e se perdem em rajada no transporte de memória compartilhada do Fast-DDS com QoS *best effort*. Segmento de 128 MB não mudou nada; sem o perfil se perde muito mais (2,7 fps chegando). O problema já existia no pipeline do TP1. **Próximo passo:** testar QoS *reliable* na câmera ou o CycloneDDS. Também limitei o torch a 4 threads (`threads_cpu`) para não disputar CPU com os outros nós, mas isso não era a causa das pausas.
+- **Problema:** no Gazebo o robô não girava no lugar. **Solução:** atrito anisotrópico nas rodas (lateral 0,2): 158° de 172° num giro de teste.
