@@ -1,0 +1,18 @@
+// Material Ogre do alvo impresso (Gazebo Classic 11): a arte real do alvo como textura da folha.
+material AlvoImpresso/Folha
+{
+  technique
+  {
+    pass
+    {
+      ambient 0.9 0.9 0.9 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      specular 0.05 0.05 0.05 1.0 4.0
+      texture_unit
+      {
+        texture alvo_impresso.png
+        filtering trilinear
+      }
+    }
+  }
+}

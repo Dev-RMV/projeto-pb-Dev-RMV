@@ -1,0 +1,85 @@
+Starting >>> projeto_bloco_description
+Starting >>> projeto_bloco_interfaces
+Finished <<< projeto_bloco_description [1.25s]
+Finished <<< projeto_bloco_interfaces [6.03s]
+Starting >>> projeto_bloco
+Finished <<< projeto_bloco [0.83s]
+Summary: 3 packages finished [6.98s]
+[reproduzir] modelos: 6.0M ros2_ws/src/projeto_bloco/modelos/alvo_yolov8n_416.pt 6.5M ros2_ws/src/projeto_bloco/modelos/alvo_yolov8n_seg_416.pt  22M ros2_ws/src/projeto_bloco/modelos/alvo_yolov8s_640.pt 
+[reproduzir] subindo Gazebo, SLAM e percepção (log em ros2_ws/log/reproduzir.log)
+[reproduzir] nós:
+   /camera_controller
+   /estados_juntas
+   /esteiras
+   /gazebo
+   /joint_state_publisher
+   /lidar_controller
+   /piloto_demo
+   /rastreador_yolo
+   /robot_state_publisher
+   /segmentador_yolo
+   /servidor_engajar
+   /slam_toolbox
+   /transform_listener_impl_639c92d7f8d0
+[reproduzir] tópicos:
+   /camera/image_raw
+   /cmd_vel
+   /joint_states
+   /map
+   /map_metadata
+   /odom
+   /scan
+   /tf
+   /tf_static
+   /torre/joint_states
+   /torre/visao
+   /vision/deteccoes
+   /vision/rastreamento
+   /vision/segmentacao
+   /vision/segmented
+[reproduzir] taxas:
+   /scan                   average rate: 9.933
+   /camera/image_raw       average rate: 14.992
+   /vision/segmented       average rate: 2.844
+   /vision/deteccoes       average rate: 5.013
+[reproduzir] ===== 1) action client: engajar um alvo visto pela câmera simulada (robô ainda parado) =====
+[INFO] [1793118294.705541379] [cliente_engajar]: /arma/controle: arma ARMADA: goals de /engajar_alvo liberados
+[INFO] [1793118294.705770218] [cliente_engajar]: [goal 1] enviando: classe="alvo"
+[INFO] [1793118294.707551422] [cliente_engajar]: [goal 1] aceito
+[INFO] [1793118294.709435510] [cliente_engajar]:   feedback   1: MIRANDO     10.0%  erro   61.3 px  pan   +3.3  tilt   -3.8  id   1  t= 0.0 s
+[INFO] [1793118294.809340238] [cliente_engajar]:   feedback   2: MIRANDO     31.1%  erro   37.0 px  pan   +5.3  tilt   -6.1  id   1  t= 0.1 s
+[INFO] [1793118294.909534191] [cliente_engajar]:   feedback   3: MIRANDO     43.7%  erro   22.2 px  pan   +6.5  tilt   -7.5  id   1  t= 0.2 s
+[INFO] [1793118295.009209289] [cliente_engajar]:   feedback   4: TRAVADO     50.0%  erro   13.4 px  pan   +7.2  tilt   -8.3  id   1  t= 0.3 s
+[INFO] [1793118295.109348759] [cliente_engajar]:   feedback   5: TRAVADO     60.0%  erro    8.0 px  pan   +7.6  tilt   -8.8  id   1  t= 0.4 s
+[INFO] [1793118295.209311422] [cliente_engajar]:   feedback   6: TRAVADO     70.0%  erro    4.8 px  pan   +7.9  tilt   -9.1  id   1  t= 0.5 s
+[INFO] [1793118295.309507461] [cliente_engajar]:   feedback   7: TRAVADO     80.0%  erro    2.9 px  pan   +8.1  tilt   -9.3  id   1  t= 0.6 s
+[INFO] [1793118295.409185461] [cliente_engajar]:   feedback   8: TRAVADO     90.0%  erro    1.7 px  pan   +8.2  tilt   -9.4  id   1  t= 0.7 s
+[INFO] [1793118295.509747448] [cliente_engajar]:   feedback   9: DISPARO    100.0%  erro    1.0 px  pan   +8.2  tilt   -9.5  id   1  t= 0.8 s
+[INFO] [1793118295.609915208] [cliente_engajar]: [goal 1] RESULT SUCESSO: DISPARO em alvo #1 com erro 1.0 px apos 0.8 s
+    disparou=True  alvo=alvo #1  feedbacks recebidos=9
+    duracao 0.90 s | 1a deteccao 0.00 s | disparo 0.80 s
+    ciclos 9 (com alvo 9) | erro medio 16.9 px, final 1.0 px | torre pan +8.2 tilt -9.5 graus
+[INFO] [1793118295.610262526] [cliente_engajar]: result registrado em /home/rmv/pb_repo_test/ros2_ws/log/engajamentos_tp3.csv
+[reproduzir] ===== 2) árvore de TF (tf2_tools view_frames) =====
+   ros2_ws/log/frames_tp3.pdf
+   map -> base_footprint agora:
+   - Translation: [0.000, 0.000, 0.000]
+   - Rotation: in RPY (radian) [-0.000, -0.000, 0.000]
+[reproduzir] ===== 3) rota do piloto_demo (quadrado de 1,4 m + giro; ~45 s) e mapa do SLAM =====
+   10s...   20s...   30s...   40s...   50s...   60s...   70s...
+   - Translation: [-0.582, 0.981, -0.000]
+   - Rotation: in RPY (radian) [-0.000, 0.000, -2.097]
+   [INFO] [1793118379.741399466] [map_io]: Map saved
+   [INFO] [1793118379.741421008] [map_saver]: Map saved successfully
+   ros2_ws/log/mapa_tp3.pgm + .yaml
+[reproduzir] ===== 4) quadros das imagens publicadas (ros2_ws/log/evidencias) =====
+   [INFO] [1793118380.241378457] [salvar_imagens]: aguardando ['/camera/image_raw', '/torre/visao', '/vision/rastreamento', '/vision/segmented'] -> /home/rmv/pb_repo_test/ros2_ws/log/evidencias
+   [INFO] [1793118380.244144957] [salvar_imagens]: /vision/rastreamento (640x480) -> vision_rastreamento.jpg
+   [INFO] [1793118380.252642644] [salvar_imagens]: /camera/image_raw (640x480) -> camera_image_raw.jpg
+   [INFO] [1793118380.600533675] [salvar_imagens]: /vision/segmented (640x480) -> vision_segmented.jpg
+   [INFO] [1793118380.602438373] [salvar_imagens]: /torre/visao (640x480) -> torre_visao.jpg
+[reproduzir] sistema no ar (Ctrl+C encerra). Em outro terminal: source ros2_ws/ambiente.sh
+   ros2 run teleop_twist_keyboard teleop_twist_keyboard      # dirigir (piloto_demo ja parou)
+   ros2 run projeto_bloco cliente_engajar
+   ros2 param load /rastreador_yolo $(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/params_uno_q.yaml
+[reproduzir] encerrando

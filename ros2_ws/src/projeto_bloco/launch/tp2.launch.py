@@ -10,9 +10,11 @@ TP2: camera -> rastreador YOLO (+Kalman) -> action server de engajamento, com o 
   ros2 launch projeto_bloco tp2.launch.py source:=0                  # camera 0
 Sem source:=, usa midia/alvos_dv20.mp4 do workspace (achado subindo a partir da instalacao do
 pacote: <ws>/install/projeto_bloco -> <ws>/midia).
-O rastreador precisa do venv do YOLO no PYTHONPATH: `source ros2_ws/ambiente.sh` antes.
+O rastreador precisa do venv do YOLO (<ws>/.venv, criado pelo scripts/setup.sh): o launch o poe no
+PYTHONPATH sozinho (mesma busca); `source ros2_ws/ambiente.sh` continua valendo para os terminais.
 """
 
+import glob
 import os
 
 from ament_index_python.packages import get_package_prefix, get_package_share_directory
@@ -37,6 +39,19 @@ def video_padrao():
     return ''
 
 
+def pythonpath_com_venv():
+    """PYTHONPATH com o site-packages de <ws>/.venv (venv do YOLO) na frente, se ele existir."""
+    atual = os.environ.get('PYTHONPATH', '')
+    pasta = get_package_prefix('projeto_bloco')
+    for _ in range(3):
+        pasta = os.path.dirname(pasta)
+        for site in sorted(glob.glob(os.path.join(pasta, '.venv', 'lib', 'python3*', 'site-packages'))):
+            if site not in atual.split(os.pathsep):
+                return site + (os.pathsep + atual if atual else '')
+            return atual
+    return atual
+
+
 def generate_launch_description():
     share = get_package_share_directory('projeto_bloco')
     params = os.path.join(share, 'config', 'params.yaml')
@@ -45,6 +60,8 @@ def generate_launch_description():
     show = LaunchConfiguration('show')
 
     return LaunchDescription([
+        # venv do YOLO no PYTHONPATH do rastreador, mesmo sem `source ambiente.sh`
+        SetEnvironmentVariable('PYTHONPATH', pythonpath_com_venv()),
         # Fast-DDS com segmento SHM maior: sem isso frames grandes chegam a ~5 fps (ver o XML)
         SetEnvironmentVariable('FASTRTPS_DEFAULT_PROFILES_FILE',
                                os.path.join(share, 'config', 'fastdds_profile.xml')),

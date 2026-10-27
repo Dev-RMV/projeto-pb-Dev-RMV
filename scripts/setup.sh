@@ -9,6 +9,7 @@
 # TP2: RViz/URDF/Gazebo Classic pelo apt e o YOLO (ultralytics + torch CPU, versoes fixas em
 # requirements.txt) num venv em ros2_ws/.venv — o ROS continua no Python do sistema e o venv entra
 # no PYTHONPATH pelo ros2_ws/ambiente.sh.
+# TP3: SLAM Toolbox, map_server (salvar o mapa) e teleop_twist_keyboard pelo apt.
 set -e
 cd "$(dirname "$0")/.."
 
@@ -42,13 +43,15 @@ fi
 
 # 2. Dependências ROS + OpenCV (as mesmas declaradas nos package.xml)
 echo "[setup] 3/4 ROS 2 Humble (ros-base), cv_bridge, OpenCV, colcon, g++; RViz, URDF (xacro, check_urdf),"
-echo "              robot/joint_state_publisher, tf2_tools, Gazebo Classic 11 (alguns minutos na 1a vez)"
+echo "              robot/joint_state_publisher, tf2_tools, Gazebo Classic 11, SLAM Toolbox, map_server,"
+echo "              teleop_twist_keyboard (alguns minutos na 1a vez)"
 $SUDO apt-get install -y -qq ros-humble-ros-base ros-humble-cv-bridge build-essential \
                              python3-colcon-common-extensions python3-opencv python3-numpy opencv-data \
                              python3-venv ros-humble-rviz2 ros-humble-xacro ros-humble-urdfdom \
                              ros-humble-robot-state-publisher ros-humble-joint-state-publisher \
                              ros-humble-joint-state-publisher-gui ros-humble-tf2-tools \
-                             ros-humble-gazebo-ros-pkgs >/dev/null
+                             ros-humble-gazebo-ros-pkgs ros-humble-slam-toolbox \
+                             ros-humble-nav2-map-server ros-humble-teleop-twist-keyboard >/dev/null
 
 # 3. Dependências Python do YOLO: venv ros2_ws/.venv (sem sudo; ~1,4 GB com o torch de CPU)
 echo "[setup] 4/4 venv ros2_ws/.venv: ultralytics + torch CPU (requirements.txt)"

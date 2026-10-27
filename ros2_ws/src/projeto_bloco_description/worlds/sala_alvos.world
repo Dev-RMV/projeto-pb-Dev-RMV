@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<!--
+  Mundo do TP3 (SLAM + percepcao): sala 6 x 6 m com paredes, obstaculos para o mapa ter forma
+  (pilar, caixas e um muro) e tres folhas A4 com a arte REAL do alvo (model://alvo_impresso), que
+  o detector e o segmentador reconhecem. O robo nasce na origem olhando para +x: os alvos 1 e 2
+  ficam no campo de visao da camera (70 graus) logo no inicio.
+  A rota do piloto_demo (config/params.yaml) e um quadrado de 1,4 m no quadrante +x/+y, longe dos
+  obstaculos; os alvos ficam a mais de 0,5 m da rota.
+-->
+<sdf version="1.6">
+  <world name="sala_alvos">
+    <include><uri>model://ground_plane</uri></include>
+    <include><uri>model://sun</uri></include>
+
+    <!-- paredes: 6 x 6 m, 0,5 m de altura -->
+    <model name="paredes">
+      <static>true</static>
+      <link name="link">
+        <collision name="c_norte"><pose>3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry></collision>
+        <visual name="v_norte"><pose>3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c_sul"><pose>-3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry></collision>
+        <visual name="v_sul"><pose>-3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c_leste"><pose>0 -3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry></collision>
+        <visual name="v_leste"><pose>0 -3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c_oeste"><pose>0 3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry></collision>
+        <visual name="v_oeste"><pose>0 3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- obstaculos (estaticos) para o mapa do SLAM -->
+    <model name="pilar">
+      <static>true</static>
+      <pose>-1.5 1.5 0.3 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.2</radius><length>0.6</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.2</radius><length>0.6</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Orange</name></script></material></visual>
+      </link>
+    </model>
+    <model name="caixa_a">
+      <static>true</static>
+      <pose>1.0 2.4 0.25 0 0 0.3</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.6 0.4 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.6 0.4 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+    <model name="caixa_b">
+      <static>true</static>
+      <pose>-1.8 -1.6 0.2 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.5 0.4</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.5 0.4</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+    <model name="muro">
+      <static>true</static>
+      <pose>0.6 -2.2 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>1.4 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.4 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- postes de madeira dos alvos 1 e 2 (0,25 m; a folha fica em cima) -->
+    <model name="poste_1">
+      <static>true</static>
+      <pose>2.2 0.3 0.125 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+    <model name="poste_2">
+      <static>true</static>
+      <pose>2.5 -1.1 0.125 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- alvos impressos (folha A4 com a arte real): centro da folha a 0,40 m do chao -->
+    <include>
+      <uri>model://alvo_impresso</uri>
+      <name>alvo_1</name>
+      <pose>2.2 0.3 0.40 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://alvo_impresso</uri>
+      <name>alvo_2</name>
+      <pose>2.5 -1.1 0.40 0 0 0.4</pose>
+    </include>
+    <include>   <!-- pendurado na parede norte -->
+      <uri>model://alvo_impresso</uri>
+      <name>alvo_3</name>
+      <pose>2.94 1.6 0.35 0 0 0</pose>
+    </include>
+
+    <model name="bola">
+      <pose>1.3 -0.6 0.12 0 0 0</pose>
+      <link name="link">
+        <inertial><mass>0.2</mass><inertia><ixx>0.0012</ixx><iyy>0.0012</iyy><izz>0.0012</izz></inertia></inertial>
+        <collision name="c"><geometry><sphere><radius>0.12</radius></sphere></geometry></collision>
+        <visual name="v"><geometry><sphere><radius>0.12</radius></sphere></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Blue</name></script></material></visual>
+      </link>
+    </model>
+  </world>
+</sdf>

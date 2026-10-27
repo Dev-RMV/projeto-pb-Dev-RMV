@@ -11,7 +11,7 @@ projeto: "Robô Sniper"
 entregas:
   tp1:   { entregue: false, branch: "entrega-tp1",   tag: "tp1",   video: "https://www.youtube.com/watch?v=WrpPA5194_8", data: "" }
   tp2:   { entregue: false, branch: "entrega-tp2",   tag: "tp2",   video: "https://youtu.be/VQyR84piW8Q", data: "" }
-  tp3:   { entregue: false, branch: "entrega-tp3",   tag: "tp3",   video: "", data: "" }
+  tp3:   { entregue: false, branch: "entrega-tp3",   tag: "tp3",   video: "", data: "2026-10-27" }
   tp4:   { entregue: false, branch: "entrega-tp4",   tag: "tp4",   video: "", data: "" }
   tp5:   { entregue: false, branch: "entrega-tp5",   tag: "tp5",   video: "", data: "" }
   final: { entregue: false, branch: "entrega-final", tag: "final", video: "", data: "" }
@@ -33,7 +33,7 @@ O professor corrige **executando** num clone limpo — mantenha isto funcionando
 ./scripts/setup.sh        # dependências além do setup padrão da disciplina
 ./scripts/reproduzir.sh   # compila, obtém/gera artefatos e roda a demo do TP corrente
 ```
-Demo atual (TP2): detecção de alvos de tiro (YOLOv8s treinado) com rastreamento e filtro de Kalman, action de engajamento (servidor + cliente), parâmetros dinâmicos e URDF no RViz. Comandos manuais e detalhes: [`ros2_ws/src/projeto_bloco/README.md`](ros2_ws/src/projeto_bloco/README.md).
+Demo atual (TP3): `bringup.launch.py` sobe com um comando o Gazebo Classic 11 (sala com obstáculos e alvos impressos), o URDF, o SLAM Toolbox (mapa + TF `map → odom → base_footprint`), a percepção do TP2, a segmentação por instância dos alvos (`/vision/segmented`), o RViz2 e um piloto que percorre a sala; o script ainda gera a árvore de TF, salva o mapa e engaja um alvo. A demo do TP2 continua em `./scripts/reproduzir_tp2.sh`. Comandos manuais e detalhes: [`ros2_ws/src/projeto_bloco/README.md`](ros2_ws/src/projeto_bloco/README.md).
 
 ## Fluxo de branches (leia o [consulta/git.md](consulta/git.md))
 - **`main`** — estado atual e estável do projeto (evolui TP a TP; sempre compilável).

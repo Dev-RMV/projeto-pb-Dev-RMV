@@ -1,0 +1,98 @@
+[INFO] [launch]: All log files can be found below /home/rmv/.ros/log/2026-10-27-13-24-31-343066-RMV-DESKTOP-10161
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: [bringup] 1/5 Gazebo + robot_state_publisher
+[INFO] [launch.user]: [bringup] 2/5 spawn do robo (aguarda o gzserver)
+[INFO] [gzserver-1]: process started with pid [10190]
+[INFO] [robot_state_publisher-2]: process started with pid [10192]
+[INFO] [spawn_entity.py-3]: process started with pid [10194]
+[robot_state_publisher-2] [INFO] [1793118271.559106949] [robot_state_publisher]: got segment base_footprint
+[robot_state_publisher-2] [INFO] [1793118271.559171375] [robot_state_publisher]: got segment base_link
+[robot_state_publisher-2] [INFO] [1793118271.559176326] [robot_state_publisher]: got segment camera_link
+[robot_state_publisher-2] [INFO] [1793118271.559178423] [robot_state_publisher]: got segment camera_optical_link
+[robot_state_publisher-2] [INFO] [1793118271.559180447] [robot_state_publisher]: got segment emissor_link
+[robot_state_publisher-2] [INFO] [1793118271.559182492] [robot_state_publisher]: got segment esteira_dir_link
+[robot_state_publisher-2] [INFO] [1793118271.559184669] [robot_state_publisher]: got segment esteira_esq_link
+[robot_state_publisher-2] [INFO] [1793118271.559186448] [robot_state_publisher]: got segment lidar_link
+[robot_state_publisher-2] [INFO] [1793118271.559188335] [robot_state_publisher]: got segment mastro_link
+[robot_state_publisher-2] [INFO] [1793118271.559190145] [robot_state_publisher]: got segment roda_guia_dir_link
+[robot_state_publisher-2] [INFO] [1793118271.559192024] [robot_state_publisher]: got segment roda_guia_esq_link
+[robot_state_publisher-2] [INFO] [1793118271.559193781] [robot_state_publisher]: got segment roda_motriz_dir_link
+[robot_state_publisher-2] [INFO] [1793118271.559195713] [robot_state_publisher]: got segment roda_motriz_esq_link
+[robot_state_publisher-2] [INFO] [1793118271.559197474] [robot_state_publisher]: got segment torre_pan_link
+[robot_state_publisher-2] [INFO] [1793118271.559199295] [robot_state_publisher]: got segment torre_tilt_link
+[spawn_entity.py-3] [INFO] [1793118272.084644639] [spawn_entity]: Spawn Entity started
+[spawn_entity.py-3] [INFO] [1793118272.084818544] [spawn_entity]: Loading entity published on topic robot_description
+[spawn_entity.py-3] [INFO] [1793118272.085875171] [spawn_entity]: Waiting for entity xml on robot_description
+[spawn_entity.py-3] [INFO] [1793118272.096380451] [spawn_entity]: Waiting for service /spawn_entity, timeout = 30
+[spawn_entity.py-3] [INFO] [1793118272.096512788] [spawn_entity]: Waiting for service /spawn_entity
+[spawn_entity.py-3] [INFO] [1793118273.622182868] [spawn_entity]: Calling service /spawn_entity
+[gzserver-1] [INFO] [1793118274.484524275] [camera_controller]: Publishing camera info to [/camera/camera_info]
+[spawn_entity.py-3] [INFO] [1793118274.489170929] [spawn_entity]: Spawn status: SpawnEntity: Successfully spawned entity [robo_sniper]
+[gzserver-1] [INFO] [1793118274.597276102] [esteiras]: Wheel pair 1 separation set to [0.190000m]
+[gzserver-1] [INFO] [1793118274.597317410] [esteiras]: Wheel pair 2 separation set to [0.190000m]
+[gzserver-1] [INFO] [1793118274.597323029] [esteiras]: Wheel pair 1 diameter set to [0.070000m]
+[gzserver-1] [INFO] [1793118274.597326141] [esteiras]: Wheel pair 2 diameter set to [0.070000m]
+[gzserver-1] [INFO] [1793118274.597937354] [esteiras]: Subscribed to [/cmd_vel]
+[gzserver-1] [INFO] [1793118274.599200583] [esteiras]: Advertise odometry on [/odom]
+[gzserver-1] [INFO] [1793118274.600651460] [esteiras]: Publishing odom transforms between [odom] and [base_footprint]
+[gzserver-1] [INFO] [1793118274.606589516] [estados_juntas]: Going to publish joint [roda_motriz_esq_joint]
+[gzserver-1] [INFO] [1793118274.606633897] [estados_juntas]: Going to publish joint [roda_motriz_dir_joint]
+[gzserver-1] [INFO] [1793118274.606638637] [estados_juntas]: Going to publish joint [roda_guia_esq_joint]
+[gzserver-1] [INFO] [1793118274.606641151] [estados_juntas]: Going to publish joint [roda_guia_dir_joint]
+[INFO] [spawn_entity.py-3]: process has finished cleanly [pid 10194]
+[INFO] [launch.user]: [bringup] robo no Gazebo: subindo juntas, SLAM, percepcao, RViz e piloto
+[INFO] [joint_state_publisher-4]: process started with pid [10407]
+[INFO] [async_slam_toolbox_node-5]: process started with pid [10409]
+[INFO] [rastreador_yolo-6]: process started with pid [10411]
+[INFO] [segmentador_yolo-7]: process started with pid [10413]
+[INFO] [servidor_engajar-8]: process started with pid [10415]
+[async_slam_toolbox_node-5] [INFO] [1793118274.640024647] [slam_toolbox]: Node using stack size 40000000
+[async_slam_toolbox_node-5] [INFO] [1793118274.712479622] [slam_toolbox]: Using solver plugin solver_plugins::CeresSolver
+[async_slam_toolbox_node-5] [INFO] [1793118274.712542752] [slam_toolbox]: CeresSolver: Using SCHUR_JACOBI preconditioner.
+[joint_state_publisher-4] [INFO] [1793118274.844783593] [joint_state_publisher]: Waiting for robot_description to be published on the robot_description topic...
+[servidor_engajar-8] [INFO] [1793118274.935555088] [servidor_engajar]: /engajar_alvo e /arma/controle prontos; arma DESARMADA (ros2 service call /arma/controle projeto_bloco_interfaces/srv/ControleArma "{armar: true}")
+[async_slam_toolbox_node-5] Registering sensor: [Custom Described Lidar]
+[segmentador_yolo-7] [INFO] [1793118276.368471366] [segmentador_yolo]: modelo /home/rmv/pb_repo_test/ros2_ws/install/projeto_bloco/share/projeto_bloco/modelos/alvo_yolov8n_seg_416.pt carregado em cpu (0.7 s); classes ['alvo']
+[segmentador_yolo-7] [INFO] [1793118276.389269752] [segmentador_yolo]: /camera/image_raw -> /vision/segmented (alpha 0.50), /vision/segmentacao; conf >= 0.30, 3.0 Hz
+[rastreador_yolo-6] [INFO] [1793118276.422555106] [rastreador_yolo]: modelo /home/rmv/pb_repo_test/ros2_ws/install/projeto_bloco/share/projeto_bloco/modelos/alvo_yolov8s_640.pt carregado em cpu (0.7 s)
+[rastreador_yolo-6] [INFO] [1793118276.441023305] [rastreador_yolo]: alvo_yolov8s_640.pt (cpu), confianca >= 0.50, 5.0 Hz, classes ['alvo'] -> /vision/deteccoes, /vision/rastreamento
+[INFO] [piloto_demo-9]: process started with pid [10795]
+[piloto_demo-9] [INFO] [1793118277.848617332] [piloto_demo]: 10 passos, ~45 s de rota + 30 s de espera
+[rastreador_yolo-6] [INFO] [1793118286.497305386] [rastreador_yolo]: rugosidade media da trilha (|2a diferenca|, 144 pontos): bruta 0.1 px, Kalman 0.1 px (-50%)
+[servidor_engajar-8] [INFO] [1793118294.696220723] [servidor_engajar]: /arma/controle -> arma ARMADA: goals de /engajar_alvo liberados
+[servidor_engajar-8] [INFO] [1793118294.708485443] [servidor_engajar]: goal aceito: classe="alvo" confianca>=0.50 tolerancia 15 px, travar 0.5 s, limite 30 s
+[servidor_engajar-8] [INFO] [1793118295.609136887] [servidor_engajar]: goal sucesso: DISPARO em alvo #1 com erro 1.0 px apos 0.8 s | ciclos 9 (com alvo 9), erro medio 16.9 px
+[rastreador_yolo-6] [INFO] [1793118296.700174591] [rastreador_yolo]: rugosidade media da trilha (|2a diferenca|, 153 pontos): bruta 0.1 px, Kalman 0.1 px (-50%)
+[rastreador_yolo-6] [INFO] [1793118307.386039961] [rastreador_yolo]: rugosidade media da trilha (|2a diferenca|, 156 pontos): bruta 0.1 px, Kalman 0.0 px (-49%)
+[piloto_demo-9] [INFO] [1793118308.231522763] [piloto_demo]: passo 1/10: v=0.00 m/s w=0 graus/s por 3.0 s
+[piloto_demo-9] [INFO] [1793118311.233988210] [piloto_demo]: passo 2/10: v=0.25 m/s w=0 graus/s por 5.6 s
+[piloto_demo-9] [INFO] [1793118316.840630009] [piloto_demo]: passo 3/10: v=0.00 m/s w=45 graus/s por 2.0 s
+[rastreador_yolo-6] [INFO] [1793118317.417745928] [rastreador_yolo]: rugosidade media da trilha (|2a diferenca|, 115 pontos): bruta 0.5 px, Kalman 0.4 px (-11%)
+[piloto_demo-9] [INFO] [1793118318.841072654] [piloto_demo]: passo 4/10: v=0.25 m/s w=0 graus/s por 5.6 s
+[piloto_demo-9] [INFO] [1793118324.546132079] [piloto_demo]: passo 5/10: v=0.00 m/s w=45 graus/s por 2.0 s
+[piloto_demo-9] [INFO] [1793118326.546853611] [piloto_demo]: passo 6/10: v=0.25 m/s w=0 graus/s por 5.6 s
+[piloto_demo-9] [INFO] [1793118332.150836384] [piloto_demo]: passo 7/10: v=0.00 m/s w=45 graus/s por 2.0 s
+[piloto_demo-9] [INFO] [1793118334.152086170] [piloto_demo]: passo 8/10: v=0.25 m/s w=0 graus/s por 5.6 s
+[piloto_demo-9] [INFO] [1793118340.150228552] [piloto_demo]: passo 9/10: v=0.00 m/s w=45 graus/s por 2.0 s
+[piloto_demo-9] [INFO] [1793118342.151499106] [piloto_demo]: passo 10/10: v=0.00 m/s w=30 graus/s por 12.0 s
+[piloto_demo-9] [INFO] [1793118354.158724557] [piloto_demo]: rota concluida: robo parado
+[async_slam_toolbox_node-5] [INFO] [1793118502.385916162] [slam_toolbox]: Message Filter dropping message: frame 'lidar_link' at time 225.394 for reason 'discarding message because the queue is full'
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [piloto_demo-9]: sending signal 'SIGINT' to process[piloto_demo-9]
+[INFO] [servidor_engajar-8]: sending signal 'SIGINT' to process[servidor_engajar-8]
+[INFO] [segmentador_yolo-7]: sending signal 'SIGINT' to process[segmentador_yolo-7]
+[INFO] [rastreador_yolo-6]: sending signal 'SIGINT' to process[rastreador_yolo-6]
+[INFO] [async_slam_toolbox_node-5]: sending signal 'SIGINT' to process[async_slam_toolbox_node-5]
+[INFO] [joint_state_publisher-4]: sending signal 'SIGINT' to process[joint_state_publisher-4]
+[INFO] [robot_state_publisher-2]: sending signal 'SIGINT' to process[robot_state_publisher-2]
+[INFO] [gzserver-1]: sending signal 'SIGINT' to process[gzserver-1]
+[async_slam_toolbox_node-5] [INFO] [1793118507.236470721] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[robot_state_publisher-2] [INFO] [1793118507.239129775] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [async_slam_toolbox_node-5]: process has finished cleanly [pid 10409]
+[INFO] [robot_state_publisher-2]: process has finished cleanly [pid 10192]
+[INFO] [piloto_demo-9]: process has finished cleanly [pid 10795]
+[INFO] [joint_state_publisher-4]: process has finished cleanly [pid 10407]
+[INFO] [servidor_engajar-8]: process has finished cleanly [pid 10415]
+[INFO] [gzserver-1]: process has finished cleanly [pid 10190]
+[INFO] [segmentador_yolo-7]: process has finished cleanly [pid 10413]
+[INFO] [rastreador_yolo-6]: process has finished cleanly [pid 10411]

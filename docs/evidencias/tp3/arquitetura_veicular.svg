@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="560" viewBox="0 0 1180 560" font-family="Segoe UI, Noto Sans, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="seta" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#444"/></marker>
+  </defs>
+  <style>
+    .caixa{fill:#f5f7fa;stroke:#4a5568;stroke-width:1.4;rx:6}
+    .sensor{fill:#e6f0ff;stroke:#1f5aa6;stroke-width:1.4;rx:6}
+    .ecu{fill:#fff4e0;stroke:#b86e00;stroke-width:1.4;rx:6}
+    .ros{fill:#e8f7e8;stroke:#2f7d32;stroke-width:1.2;rx:6}
+    .t{fill:#1d1f23}
+    .tt{fill:#1d1f23;font-weight:600}
+    .sub{fill:#5a5f66;font-size:11px}
+    .eth{stroke:#1f5aa6;stroke-width:3.5}
+    .can{stroke:#c62828;stroke-width:3.5}
+    .canfd{stroke:#c62828;stroke-width:3.5;stroke-dasharray:10 5}
+    .lin{stroke:#888;stroke-width:2;stroke-dasharray:3 3}
+    .usb{stroke:#6a1b9a;stroke-width:2.5}
+    .uart{stroke:#00838f;stroke-width:2.5}
+    .fino{stroke:#444;stroke-width:1.2;fill:none;marker-end:url(#seta)}
+  </style>
+
+  <!-- ===================== painel esquerdo: veiculo ===================== -->
+  <rect x="10" y="10" width="760" height="540" fill="#fff" stroke="#c9ccd1" rx="8"/>
+  <text x="24" y="34" class="tt" font-size="16">Veículo: arquitetura E/E típica de percepção (ADAS)</text>
+  <text x="24" y="52" class="sub">Ethernet automotiva (azul): sensores de alta banda · CAN / CAN FD (vermelho): chassi, powertrain e sensores leves · LIN (cinza): ultrassônicos</text>
+
+  <!-- backbone ethernet -->
+  <line x1="60" y1="150" x2="720" y2="150" class="eth"/>
+  <text x="62" y="140" class="t" fill="#1f5aa6" font-weight="600">Backbone Ethernet automotiva 1000BASE-T1 (switch central) · SOME/IP, DDS, PTP</text>
+
+  <!-- sensores de alta banda (em cima) -->
+  <rect x="40" y="70" width="120" height="52" class="sensor"/>
+  <text x="48" y="90" class="tt">Câmeras ×6-11</text>
+  <text x="48" y="106" class="sub">GMSL2/FPD-Link → ECU</text>
+  <text x="48" y="118" class="sub">ou 100BASE-T1 (IP)</text>
+  <line x1="100" y1="122" x2="100" y2="150" class="eth"/>
+
+  <rect x="190" y="70" width="120" height="52" class="sensor"/>
+  <text x="198" y="90" class="tt">LiDAR 3D</text>
+  <text x="198" y="106" class="sub">UDP/Ethernet 100/1000</text>
+  <text x="198" y="118" class="sub">nuvem de pontos</text>
+  <line x1="250" y1="122" x2="250" y2="150" class="eth"/>
+
+  <rect x="340" y="70" width="120" height="52" class="sensor"/>
+  <text x="348" y="90" class="tt">Radar 4D imaging</text>
+  <text x="348" y="106" class="sub">Ethernet (novos)</text>
+  <text x="348" y="118" class="sub">ou CAN FD (clássicos)</text>
+  <line x1="400" y1="122" x2="400" y2="150" class="eth"/>
+
+  <rect x="490" y="70" width="120" height="52" class="sensor"/>
+  <text x="498" y="90" class="tt">V2X / telemática</text>
+  <text x="498" y="106" class="sub">Ethernet, 5G</text>
+  <text x="498" y="118" class="sub">mapas HD, OTA</text>
+  <line x1="550" y1="122" x2="550" y2="150" class="eth"/>
+
+  <rect x="640" y="70" width="110" height="52" class="sensor"/>
+  <text x="648" y="90" class="tt">Gravador / HMI</text>
+  <text x="648" y="106" class="sub">Ethernet</text>
+  <text x="648" y="118" class="sub">logs, diagnóstico</text>
+  <line x1="695" y1="122" x2="695" y2="150" class="eth"/>
+
+  <!-- computador central -->
+  <rect x="150" y="190" width="400" height="92" class="ecu"/>
+  <text x="162" y="212" class="tt" font-size="14">Computador central de ADAS (domain / zonal controller)</text>
+  <text x="162" y="230" class="sub">SoC com GPU/NPU: fusão de sensores, detecção, segmentação, SLAM, planejamento</text>
+  <text x="162" y="246" class="sub">redundância: 2 SoCs e 2 fontes; segurança funcional (ASIL) em microcontroladores</text>
+  <text x="162" y="266" class="sub">ROS 2 aqui: drivers → sensor_msgs · TF · Nav2 · nós de percepção (como no projeto)</text>
+  <line x1="400" y1="150" x2="400" y2="190" class="eth"/>
+
+  <!-- gateway -->
+  <rect x="610" y="200" width="130" height="66" class="ecu"/>
+  <text x="618" y="222" class="tt">Gateway central</text>
+  <text x="618" y="238" class="sub">Ethernet ⇄ CAN FD ⇄ CAN</text>
+  <text x="618" y="254" class="sub">firewall, roteamento,</text>
+  <text x="618" y="266" class="sub">diagnóstico (UDS/DoIP)</text>
+  <line x1="675" y1="150" x2="675" y2="200" class="eth"/>
+  <line x1="550" y1="233" x2="610" y2="233" class="canfd"/>
+
+  <!-- barramento CAN FD (chassi) -->
+  <line x1="60" y1="330" x2="720" y2="330" class="canfd"/>
+  <text x="62" y="320" class="t" fill="#c62828" font-weight="600">CAN FD (chassi, 2-5 Mbit/s): comandos e estados com tempo determinístico</text>
+  <line x1="675" y1="266" x2="675" y2="330" class="canfd"/>
+
+  <rect x="40" y="350" width="120" height="52" class="sensor"/>
+  <text x="48" y="370" class="tt">Direção (EPS)</text>
+  <text x="48" y="386" class="sub">ângulo do volante,</text>
+  <text x="48" y="398" class="sub">torque assistido</text>
+  <line x1="100" y1="330" x2="100" y2="350" class="canfd"/>
+
+  <rect x="190" y="350" width="120" height="52" class="sensor"/>
+  <text x="198" y="370" class="tt">Freio (ESP/ABS)</text>
+  <text x="198" y="386" class="sub">velocidade das rodas,</text>
+  <text x="198" y="398" class="sub">guinada, aceleração</text>
+  <line x1="250" y1="330" x2="250" y2="350" class="canfd"/>
+
+  <rect x="340" y="350" width="120" height="52" class="sensor"/>
+  <text x="348" y="370" class="tt">Radar frontal</text>
+  <text x="348" y="386" class="sub">lista de objetos</text>
+  <text x="348" y="398" class="sub">(77 GHz, ~1 kB/ciclo)</text>
+  <line x1="400" y1="330" x2="400" y2="350" class="canfd"/>
+
+  <rect x="490" y="350" width="120" height="52" class="sensor"/>
+  <text x="498" y="370" class="tt">GNSS + IMU</text>
+  <text x="498" y="386" class="sub">CAN FD / UART (NMEA)</text>
+  <text x="498" y="398" class="sub">10-100 Hz</text>
+  <line x1="550" y1="330" x2="550" y2="350" class="canfd"/>
+
+  <rect x="640" y="350" width="110" height="52" class="sensor"/>
+  <text x="648" y="370" class="tt">Motor / BMS</text>
+  <text x="648" y="386" class="sub">CAN 500 kbit/s</text>
+  <text x="648" y="398" class="sub">(powertrain)</text>
+  <line x1="695" y1="330" x2="695" y2="350" class="can"/>
+
+  <!-- LIN / ultrassonicos -->
+  <line x1="60" y1="450" x2="720" y2="450" class="lin"/>
+  <text x="62" y="440" class="t" fill="#666" font-weight="600">LIN (20 kbit/s) e CAN de carroceria (125-500 kbit/s): ultrassônicos, portas, luzes</text>
+  <rect x="40" y="465" width="200" height="40" class="sensor"/>
+  <text x="48" y="482" class="tt">Ultrassônicos ×12</text>
+  <text x="48" y="497" class="sub">até ~5 m; LIN → ECU de estacionamento</text>
+  <rect x="280" y="465" width="200" height="40" class="sensor"/>
+  <text x="288" y="482" class="tt">Câmera de ré / 360°</text>
+  <text x="288" y="497" class="sub">vídeo analógico ou GMSL para a central multimídia</text>
+  <line x1="665" y1="402" x2="665" y2="450" class="lin"/>
+
+  <text x="24" y="528" class="sub">ROS 2: Ethernet → drivers UDP/TCP (velodyne, ouster, GigE Vision) → sensor_msgs/PointCloud2, Image</text>
+  <text x="24" y="542" class="sub">CAN → ros2_socketcan / can_msgs → decodificação DBC → nav_msgs/Odometry, sensor_msgs/Imu · frame_id do URDF e TF</text>
+
+  <!-- ===================== painel direito: robo sniper ===================== -->
+  <rect x="790" y="10" width="380" height="540" fill="#fff" stroke="#c9ccd1" rx="8"/>
+  <text x="804" y="34" class="tt" font-size="16">Robô Sniper (Arduino UNO Q)</text>
+  <text x="804" y="52" class="sub">sem CAN nem Ethernet: USB, UART e GPIO; ROS 2 Humble em Docker</text>
+
+  <rect x="830" y="150" width="300" height="100" class="ecu"/>
+  <text x="842" y="172" class="tt" font-size="14">Arduino UNO Q</text>
+  <text x="842" y="190" class="sub">Qualcomm QRB2210 (4× Cortex-A53, 4 GB, Debian 13)</text>
+  <text x="842" y="206" class="sub">+ microcontrolador STM32 (tempo real: motores, servos)</text>
+  <text x="842" y="224" class="sub">ROS 2: camera_pub · rastreador_yolo (v8n 416 a 1-2 Hz)</text>
+  <text x="842" y="240" class="sub">segmentador_yolo · servidor_engajar · slam_toolbox</text>
+
+  <rect x="810" y="70" width="150" height="52" class="sensor"/>
+  <text x="818" y="90" class="tt">Câmera DV20</text>
+  <text x="818" y="106" class="sub">USB 2.0 (UVC), MJPG</text>
+  <text x="818" y="118" class="sub">640×480 @ 30 fps</text>
+  <line x1="885" y1="122" x2="885" y2="150" class="usb"/>
+  <text x="890" y="140" class="sub" fill="#6a1b9a">USB</text>
+
+  <rect x="1000" y="70" width="150" height="52" class="sensor"/>
+  <text x="1008" y="90" class="tt">LiDAR 2D</text>
+  <text x="1008" y="106" class="sub">tipo RPLIDAR A1: UART</text>
+  <text x="1008" y="118" class="sub">115200 → USB-serial</text>
+  <line x1="1075" y1="122" x2="1075" y2="150" class="uart"/>
+  <text x="1080" y="140" class="sub" fill="#00838f">UART</text>
+
+  <rect x="810" y="300" width="150" height="56" class="sensor"/>
+  <text x="818" y="320" class="tt">Esteiras (2 motores)</text>
+  <text x="818" y="336" class="sub">ponte H via STM32 (PWM)</text>
+  <text x="818" y="350" class="sub">encoders → odometria</text>
+  <line x1="885" y1="250" x2="885" y2="300" class="uart"/>
+  <text x="890" y="280" class="sub" fill="#00838f">UART / bridge</text>
+
+  <rect x="1000" y="300" width="150" height="56" class="sensor"/>
+  <text x="1008" y="320" class="tt">Torre pan/tilt + emissor</text>
+  <text x="1008" y="336" class="sub">2 servos (PWM) e LED/laser</text>
+  <text x="1008" y="350" class="sub">(GPIO) pelo STM32</text>
+  <line x1="1075" y1="250" x2="1075" y2="300" class="uart"/>
+
+  <rect x="810" y="380" width="340" height="160" class="ros"/>
+  <text x="822" y="400" class="tt" fill="#2f7d32">Como entra no pipeline ROS 2 do projeto</text>
+  <text x="822" y="418" class="sub">câmera → /camera/image_raw (Image, camera_optical_link)</text>
+  <text x="822" y="434" class="sub">lidar → /scan (LaserScan, lidar_link) → slam_toolbox → /map</text>
+  <text x="822" y="450" class="sub">encoders → /odom + TF odom→base_footprint (hoje: Gazebo)</text>
+  <text x="822" y="466" class="sub">/cmd_vel → STM32 (micro-ROS ou serial) → PWM dos motores</text>
+  <text x="822" y="482" class="sub">/torre/joint_states ← servos · /arma/disparo → emissor</text>
+  <text x="822" y="504" class="sub">Equivalente veicular: USB/UART fazem o papel do CAN (comandos,</text>
+  <text x="822" y="520" class="sub">baixa banda) e da Ethernet (vídeo), sem determinismo nem redundância.</text>
+</svg>

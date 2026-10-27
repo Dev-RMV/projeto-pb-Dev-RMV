@@ -1,0 +1,72 @@
+# SLAM Toolbox (online, assincrono) para o Robo Sniper no Gazebo: constroi /map a partir de /scan
+# e publica a correcao map -> odom (o odom -> base_footprint vem da odometria das esteiras).
+# Base: mapper_params_online_async.yaml do slam_toolbox (Humble), ajustado ao lidar simulado
+# (360 amostras, 0,15-12 m, 10 Hz, como um RPLIDAR A1) e a sala de 6 x 6 m.
+# Carregado pelo bringup.launch.py (argumento slam_params:=).
+
+slam_toolbox:
+  ros__parameters:
+    use_sim_time: true
+
+    # ---- plugins do solver (Ceres) ----
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+    ceres_loss_function: None
+
+    # ---- frames e topicos (os mesmos do URDF e do plugin diff drive) ----
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan
+    mode: mapping                      # "localization" para reusar um mapa salvo
+
+    # ---- publicacao ----
+    debug_logging: false
+    throttle_scans: 1
+    transform_publish_period: 0.02     # map -> odom a 50 Hz
+    map_update_interval: 1.0           # /map a cada 1 s (RViz ve o mapa crescer)
+    resolution: 0.05                   # 5 cm por celula
+    min_laser_range: 0.2               # abaixo do minimo do lidar (0,15 m) o slam_toolbox avisa
+    max_laser_range: 12.0              # alcance do lidar do URDF
+    minimum_time_interval: 0.2
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+    stack_size_to_use: 40000000
+    enable_interactive_mode: true
+
+    # ---- quando inserir um scan novo no grafo ----
+    use_scan_matching: true
+    use_scan_barycenter: true
+    minimum_travel_distance: 0.15      # robo pequeno e sala pequena: nos mais proximos
+    minimum_travel_heading: 0.15
+    scan_buffer_size: 10
+    scan_buffer_maximum_scan_distance: 10.0
+    link_match_minimum_response_fine: 0.1
+    link_scan_maximum_distance: 1.5
+    loop_search_maximum_distance: 3.0
+    do_loop_closing: true
+    loop_match_minimum_chain_size: 10
+    loop_match_maximum_variance_coarse: 3.0
+    loop_match_minimum_response_coarse: 0.35
+    loop_match_minimum_response_fine: 0.45
+
+    # ---- correlacao (scan matcher) ----
+    correlation_search_space_dimension: 0.5
+    correlation_search_space_resolution: 0.01
+    correlation_search_space_smear_deviation: 0.1
+    loop_search_space_dimension: 8.0
+    loop_search_space_resolution: 0.05
+    loop_search_space_smear_deviation: 0.03
+
+    # ---- pesos do scan matcher ----
+    distance_variance_penalty: 0.5
+    angle_variance_penalty: 1.0
+    fine_search_angle_offset: 0.00349
+    coarse_search_angle_offset: 0.349
+    coarse_angle_resolution: 0.0349
+    minimum_angle_penalty: 0.9
+    minimum_distance_penalty: 0.5
+    use_response_expansion: true

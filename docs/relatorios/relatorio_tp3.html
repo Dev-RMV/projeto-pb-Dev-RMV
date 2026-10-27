@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Relatório TP3 — Bringup, SLAM, segmentação por instância e arquitetura de percepção veicular</title>
+<style>
+  @page { size: A4; margin: 13mm 16mm 13mm 16mm; }
+  :root { --azul: #1f5aa6; --cinza: #f2f3f5; --borda: #c9ccd1; --texto: #1d1f23; }
+  body { font-family: "Segoe UI", "Noto Sans", Arial, sans-serif; font-size: 9.8pt; line-height: 1.36;
+         color: var(--texto); background: #fff; margin: 0; }
+  h1 { font-size: 19pt; margin: 0 0 2px 0; }
+  .sub { color: #5a5f66; font-size: 9.6pt; margin-bottom: 10px; }
+  .ident { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 18px; font-size: 9.8pt; margin-bottom: 12px; }
+  h2 { color: var(--azul); font-size: 12.5pt; margin: 13px 0 6px 0; padding-bottom: 3px;
+       border-bottom: 2px solid var(--azul); break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 8px 0 4px 0; break-after: avoid; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.2pt; margin: 4px 0 6px 0; }
+  th, td { border: 1px solid var(--borda); padding: 4px 7px; vertical-align: top; text-align: left; }
+  th { background: #e9ebee; font-weight: 600; }
+  tr { break-inside: avoid; }
+  table.req td:first-child { width: 36%; }
+  table.res td:first-child { width: 26%; }
+  code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.7pt; background: var(--cinza);
+         border: 1px solid #e1e3e6; border-radius: 3px; padding: 0 3px; }
+  pre { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.3pt; background: var(--cinza);
+        border: 1px solid #dfe1e4; border-radius: 4px; padding: 7px 9px; margin: 5px 0 8px 0;
+        white-space: pre-wrap; break-inside: avoid; }
+  ul { margin: 4px 0 6px 0; padding-left: 18px; }
+  li { margin: 2px 0; }
+  figure { margin: 6px 0 8px 0; break-inside: avoid; text-align: center; }
+  figure img { width: 92%; border: 1px solid var(--borda); }
+  figure.larga img { width: 100%; }
+  figure.media img { width: 70%; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .duas img { width: 100%; border: 1px solid var(--borda); }
+  figcaption { font-size: 8.8pt; color: #4a4f56; margin-top: 3px; text-align: left; }
+  a { color: var(--azul); }
+</style>
+</head>
+<body>
+
+<h1>Relatório — TP3: bringup único, SLAM e TF, segmentação por instância e percepção veicular</h1>
+<div class="sub">PB Sistemas Robóticos 2026.2 · turma GRPEDCR3C1-M1-P1 · entrega <code>entrega-tp3</code> / tag <code>tp3</code> · 27/10/2026</div>
+<div class="ident">
+  <div><b>Aluno:</b> Rodrigo das Mercês Vianna</div>
+  <div><b>GitHub:</b> Dev-RMV (<code>projeto-pb-Dev-RMV</code>)</div>
+  <div><b>Ambiente:</b> Ubuntu 22.04 (WSL2) · ROS 2 Humble · Gazebo Classic 11 · SLAM Toolbox 2.6 · Python 3.10 · Ultralytics 8.4 (PyTorch CPU)</div>
+  <div><b>Vídeo da demo:</b> link em <code>ARTEFATOS.md</code> e no README (marcador <code>PB:VIDEO-TP3</code>)</div>
+</div>
+
+<h2>1. O que foi pedido e o que foi entregue</h2>
+<table class="req">
+  <tr><th>Requisito</th><th>Entrega</th></tr>
+  <tr><td>Launch file principal (<code>bringup.launch.py</code>) que inicializa em sequência o Gazebo com o mundo do projeto, o <code>robot_state_publisher</code> com o URDF, o RViz2 com configuração salva e todos os nós de percepção dos TPs anteriores; parâmetros via YAML; um único comando; captura de tela</td>
+      <td><code>projeto_bloco/launch/bringup.launch.py</code>: (1) Gazebo com <code>sala_alvos.world</code> + <code>robot_state_publisher</code> (xacro); (2) spawn do robô; (3) ao fim do spawn (<code>OnProcessExit</code>): <code>joint_state_publisher</code>, SLAM Toolbox, <code>rastreador_yolo</code>, <code>servidor_engajar</code> (TP2) e <code>segmentador_yolo</code> (TP3); (4) RViz2 com <code>rviz/bringup.rviz</code>; (5) <code>piloto_demo</code>. Parâmetros em <code>config/params.yaml</code>, <code>bringup.yaml</code> (<code>use_sim_time</code> para todos) e <code>slam.yaml</code>. Comando único: <code>./scripts/reproduzir.sh</code> ou <code>ros2 launch projeto_bloco bringup.launch.py</code> (fig. 2 e 3). <b>Gazebo Classic 11 em vez do Harmonic</b>: decisão registrada (seção 5)</td></tr>
+  <tr><td>Pipeline de TFs e SLAM: SLAM Toolbox integrado, mapa construído em tempo real no RViz2, TFs <code>base_link</code>, <code>odom</code>, <code>map</code> e o scan simulado; TF tree com <code>view_frames</code> e explicação de cada frame</td>
+      <td><code>async_slam_toolbox_node</code> com <code>config/slam.yaml</code> lê <code>/scan</code> (lidar simulado, 360 amostras a 10 Hz) e publica <code>/map</code> e <code>map → odom</code>; <code>odom → base_footprint</code> vem do <em>diff drive</em> do Gazebo; o <code>piloto_demo</code> percorre a sala para o mapa crescer (fig. 4 e 5). Árvore de TF em <code>docs/evidencias/tp3/frames_tp3.pdf</code>, frames explicados na seção 2</td></tr>
+  <tr><td>Segmentação semântica por instância com YOLO em imagens ou vídeo do ambiente do projeto; máscaras coloridas por classe com transparência 0,5 sobre o frame; publicação em <code>/vision/segmented</code> para o RViz2</td>
+      <td>Nó <code>segmentador_yolo</code> com um <b>YOLOv8n-seg treinado para a classe <code>alvo</code></b> (polígonos gerados a partir do gerador do dataset sintético, sem renderizar de novo); máscaras por classe com <code>alpha</code> 0,5, contorno por instância, rótulo e centroide da máscara; publica <code>/vision/segmented</code> (imagem, exibida no RViz) e <code>/vision/segmentacao</code> (<code>DeteccaoArray</code>). Testado no vídeo do robô e na câmera do Gazebo (fig. 6 e 7)</td></tr>
+  <tr><td>Análise da arquitetura de percepção veicular: protocolos CAN e Ethernet, tipos de sensores, integração de cada um ao pipeline ROS 2 do projeto, relação com os sensores do próprio projeto</td>
+      <td>Seção 4 e fig. 1: arquitetura E/E típica (backbone Ethernet automotiva para câmeras, lidar e radar de imagem; CAN FD para chassi, radar clássico, GNSS/IMU; LIN para ultrassônicos), a integração ROS 2 de cada sensor e a comparação com o Robô Sniper (câmera USB e lidar UART num Arduino UNO Q)</td></tr>
+</table>
+
+<h2>2. Como funciona</h2>
+<pre>bringup.launch.py  (parâmetros: config/params.yaml + config/bringup.yaml + config/slam.yaml)
+ 1 gzserver/gzclient (sala_alvos.world) + robot_state_publisher (URDF)      2 spawn_entity (robo_sniper)
+ 3 joint_state_publisher ← /gazebo/joint_states (rodas) + /torre/joint_states (servidor) → /joint_states
+   slam_toolbox: /scan → /map, TF map→odom           (odom→base_footprint: plugin diff drive do Gazebo)
+   câmera do Gazebo → /camera/image_raw ─┬→ rastreador_yolo → /vision/deteccoes → servidor_engajar → /torre/visao
+                                          └→ segmentador_yolo → /vision/segmented · /vision/segmentacao
+ 4 rviz2 -d rviz/bringup.rviz (Map, LaserScan, TF, RobotModel, Odometry, 3 imagens)
+ 5 piloto_demo → /cmd_vel (quadrado de 1,4 m + giro de 360°) → o mapa é construído</pre>
+<ul>
+  <li><b>Sequência:</b> o Gazebo e o <code>robot_state_publisher</code> sobem primeiro; o <code>spawn_entity.py</code> espera o serviço do gzserver, cria o robô e termina; um <code>RegisterEventHandler(OnProcessExit)</code> nesse processo dispara o resto (juntas, SLAM, percepção, RViz) e <code>TimerAction</code>s soltam o piloto (3 s) e o <code>cliente_engajar</code> (10 s), que arma a torre e envia três goals de engajamento com o robô ainda parado olhando para os alvos (parâmetros em <code>bringup.yaml</code>). Argumentos: <code>gui</code>, <code>rviz</code>, <code>slam</code>, <code>piloto</code>, <code>engajar</code>, <code>world</code>, <code>show</code>.</li>
+  <li><b>Mundo:</b> sala de 6 × 6 m com pilar, duas caixas e um muro (para o mapa ter forma) e três folhas A4 com a <b>arte real do alvo</b> como textura (<code>models/alvo_impresso</code>, exportado por <code>gazebo_model_path</code>). No TP2 os alvos eram anéis geométricos que o detector não reconhecia.</li>
+  <li><b>Tempo:</b> <code>bringup.yaml</code> põe <code>use_sim_time: true</code> em todos os nós (<code>/**</code>), então SLAM, TF, Kalman e os carimbos das imagens seguem o <code>/clock</code> do Gazebo.</li>
+  <li><b>SLAM:</b> <code>slam.yaml</code> parte do <code>mapper_params_online_async</code> do pacote: frames <code>map</code>/<code>odom</code>/<code>base_footprint</code>, resolução 5 cm, alcance 0,2–12 m, nó novo a cada 0,15 m ou 0,15 rad, fechamento de laço ligado, <code>map → odom</code> a 50 Hz e <code>/map</code> a cada 1 s.</li>
+  <li><b>Piloto:</b> rota como lista de passos no YAML (<code>reto 1.4 0.25</code>, <code>girar 90 45</code>, <code>parar 3</code>), temporizada pelo relógio do nó (tempo simulado), para a demo ser igual em qualquer máquina. <code>piloto:=false</code> deixa o <code>teleop_twist_keyboard</code> dirigir.</li>
+  <li><b>Segmentador:</b> <code>model.predict()</code> no frame mais recente a <code>frequencia_hz</code>; para cada instância, o polígono da máscara (<code>masks.xy</code>) é pintado na cor da classe numa cópia do frame, misturada com <code>alpha</code> 0,5 só onde há máscara; contorno, rótulo <code>classe conf</code> e o centroide (momentos da máscara) por cima. A mensagem <code>DeteccaoArray</code> reaproveita a do TP2 com <code>cx, cy</code> = centroide da máscara. Parâmetros alteráveis em execução: <code>confianca</code>, <code>iou</code>, <code>frequencia_hz</code>, <code>imgsz</code>, <code>alpha</code>, <code>threads_cpu</code> e <code>modelo</code> (recarrega).</li>
+  <li><b>Modelo de segmentação:</b> o dataset sintético do projeto (2000 + 400 imagens do Blender) só tinha caixas. Como cada cena é reconstruída pela semente guardada nos metadados, um script novo (<code>gerar_labels_seg.py</code>) remonta câmera e alvos no Blender e projeta os 96 pontos da borda do alvo em um polígono YOLO-seg, cortado na borda do quadro: 2400 imagens em 37 s, e a caixa de cada polígono coincidiu com a <code>bbox_amodal_px</code> dos metadados em 2497 de 2497 alvos (fig. 6, esquerda). Treino do <code>yolov8n-seg</code> em 416 px por 100 épocas com a mesma degradação tipo câmera DV20: 11 min na GPU.</li>
+</ul>
+
+<h3>Frames de referência (árvore de TF, <code>view_frames</code>)</h3>
+<table>
+  <tr><th>Frame</th><th>Pai → quem publica</th><th>O que é</th></tr>
+  <tr><td><code>map</code></td><td>raiz</td><td>Referência fixa do mundo, com origem onde o SLAM começou. Globalmente consistente, mas pode “saltar” quando o SLAM corrige a pose (fechamento de laço).</td></tr>
+  <tr><td><code>odom</code></td><td><code>map</code> → SLAM Toolbox</td><td>Referência da odometria: contínua e suave, mas deriva com o tempo (escorregamento das esteiras). A transformação <code>map → odom</code> é a correção estimada pelo SLAM com o scan.</td></tr>
+  <tr><td><code>base_footprint</code></td><td><code>odom</code> → plugin <em>diff drive</em> do Gazebo</td><td>Projeção do robô no chão (REP 105): origem no centro das esteiras, z = 0. É o frame que o SLAM rastreia (<code>base_frame</code>).</td></tr>
+  <tr><td><code>base_link</code></td><td><code>base_footprint</code> → <code>robot_state_publisher</code> (fixa)</td><td>Corpo do chassi, na altura dos eixos (3,5 cm). REP 103: x para a frente, y para a esquerda, z para cima.</td></tr>
+  <tr><td><code>roda_motriz_*</code>, <code>roda_guia_*</code>, <code>esteira_*</code></td><td><code>base_link</code> → juntas do Gazebo via <code>joint_state_publisher</code></td><td>Quatro rodas (<em>continuous</em>) e as duas lagartas (fixas) de cada lado.</td></tr>
+  <tr><td><code>camera_link</code> → <code>camera_optical_link</code></td><td><code>base_link</code> (fixas)</td><td>A câmera no padrão do corpo e o frame <b>óptico</b> (z para a frente, x para a direita, y para baixo), que é o <code>frame_id</code> das imagens e do <code>camera_info</code>.</td></tr>
+  <tr><td><code>mastro_link</code> → <code>lidar_link</code></td><td><code>base_link</code> (fixas)</td><td>Mastro traseiro e o lidar no topo: origem do <code>/scan</code>; o SLAM transforma o scan de <code>lidar_link</code> para <code>base_footprint</code> por esta cadeia.</td></tr>
+  <tr><td><code>torre_pan_link</code> → <code>torre_tilt_link</code> → <code>emissor_link</code></td><td><code>base_link</code> → juntas do <code>servidor_engajar</code> via <code>joint_state_publisher</code></td><td>Torre pan/tilt (duas <em>revolute</em>) e a ponta do cano, origem do feixe do emissor.</td></tr>
+</table>
+
+<h2>3. Como executar</h2>
+<pre>git clone https://github.com/Dev-RMV/projeto-pb-Dev-RMV.git && cd projeto-pb-Dev-RMV
+./scripts/reproduzir.sh     # instala o que faltar, compila, sobe o bringup e roda view_frames, map_saver, evidências e o cliente</pre>
+<p><code>scripts/setup.sh</code> instala pelo <code>apt</code> (ROS 2, RViz, xacro, Gazebo 11, SLAM Toolbox, map_server, teleop) e cria o venv do YOLO. À mão, cada terminal com <code>source ros2_ws/ambiente.sh</code>: <code>ros2 launch projeto_bloco bringup.launch.py</code> (<code>gui:=false</code>, <code>piloto:=false</code>…) · <code>ros2 run tf2_tools view_frames</code> · <code>ros2 run nav2_map_server map_saver_cli -f mapa</code> · <code>ros2 run projeto_bloco cliente_engajar</code> · <code>ros2 run teleop_twist_keyboard teleop_twist_keyboard</code>. A demo do TP2 continua em <code>./scripts/reproduzir_tp2.sh</code>.</p>
+
+<h2>4. Arquitetura de percepção veicular × sensores do projeto</h2>
+<figure class="larga">
+  <img src="../evidencias/tp3/arquitetura_veicular.svg" alt="Arquitetura E/E de um veículo e do Robô Sniper">
+  <figcaption>Fig. 1 — Esquerda: arquitetura E/E típica de um veículo com ADAS (diagrama próprio, baseado nas arquiteturas zonais atuais). Direita: o Robô Sniper com o Arduino UNO Q. Azul: Ethernet automotiva; vermelho: CAN / CAN FD; cinza: LIN; roxo/verde-água: USB e UART do robô.</figcaption>
+</figure>
+<table>
+  <tr><th>Sensor (veículo)</th><th>Barramento e dados</th><th>Integração no pipeline ROS 2 do projeto</th></tr>
+  <tr><td>Câmeras (6 a 11; frontal, laterais, ré)</td><td>GMSL2/FPD-Link (serial dedicado) até o ECU ou Ethernet 100/1000BASE-T1 com vídeo IP; 30 fps a 1–8 Mpx: dezenas de Mbit/s a Gbit/s por câmera</td><td>Driver (V4L2, GigE Vision) → <code>sensor_msgs/Image</code> + <code>CameraInfo</code> em <code>/camera/image_raw</code>, <code>frame_id</code> óptico no URDF: é exatamente a entrada do <code>rastreador_yolo</code> e do <code>segmentador_yolo</code>; no robô, a DV20 entra por USB (UVC)</td></tr>
+  <tr><td>LiDAR 3D (teto/para-choque)</td><td>Ethernet UDP (100 Mbit/s a 1 Gbit/s), pacotes de pontos a 10–20 Hz, PTP para sincronizar</td><td>Driver (<code>velodyne</code>, <code>ouster_ros</code>) → <code>sensor_msgs/PointCloud2</code>; para o SLAM 2D do projeto bastaria um <code>pointcloud_to_laserscan</code> → <code>/scan</code>. No robô, o lidar 2D (UART/USB-serial, <code>sllidar_ros2</code>) publica <code>/scan</code> direto no <code>lidar_link</code></td></tr>
+  <tr><td>Radar 77 GHz (frontal e de canto)</td><td>CAN FD (2–5 Mbit/s) com lista de objetos; radares 4D de imagem já usam Ethernet</td><td><code>ros2_socketcan</code> → <code>can_msgs/Frame</code> → decodificação pelo DBC → <code>radar_msgs</code>; entraria na fusão com as detecções da câmera (velocidade radial para o Kalman do rastreador)</td></tr>
+  <tr><td>Ultrassônicos (12, estacionamento)</td><td>LIN (20 kbit/s) até a ECU de estacionamento, que publica no CAN de carroceria</td><td><code>sensor_msgs/Range</code>; no projeto serviriam como camada de segurança no <code>/cmd_vel</code> (parada por proximidade)</td></tr>
+  <tr><td>Velocidade das rodas, ângulo de direção, IMU do ESP</td><td>CAN FD do chassi (determinístico, prioridade por identificador), 50–100 Hz</td><td>Nó de odometria: <code>nav_msgs/Odometry</code> + TF <code>odom → base_footprint</code> (o que o plugin do Gazebo faz hoje) e <code>sensor_msgs/Imu</code>; fundidos por <code>robot_localization</code> e consumidos pelo SLAM Toolbox</td></tr>
+  <tr><td>GNSS + IMU de navegação</td><td>CAN FD ou UART/NMEA, 10–100 Hz</td><td><code>sensor_msgs/NavSatFix</code> e <code>Imu</code>; daria o <code>map</code> global (<code>navsat_transform</code>) por cima do <code>map</code> local do SLAM</td></tr>
+</table>
+<ul>
+  <li><b>Por que dois mundos de rede:</b> CAN e CAN FD são determinísticos, baratos e tolerantes a falhas, mas carregam poucos bytes por quadro (8 e 64): servem para comandos, estados e sensores que entregam <em>listas de objetos</em>. Câmeras e lidar produzem dezenas a centenas de Mbit/s, por isso vão pela Ethernet automotiva (par trançado 100/1000BASE-T1), com middleware SOME/IP ou DDS, o mesmo DDS do ROS 2, e sincronismo por PTP. Um <b>gateway</b> traduz entre os dois e isola domínios (segurança).</li>
+  <li><b>No Robô Sniper:</b> não há CAN nem Ethernet. A câmera DV20 entra por USB 2.0 (UVC, 640×480 MJPG a 30 fps) e o lidar 2D por UART (115200 bit/s, via USB-serial); os motores das esteiras e os servos da torre ficam no microcontrolador STM32 da placa, ligado ao processador por UART (papel que o CAN de chassi faz no carro). O ROS 2 roda no Qualcomm QRB2210, sem acelerador: o detector roda a 1–2 Hz, por isso a mira usa o Kalman entre inferências. A escolha de <b>câmera + lidar 2D</b> cobre as duas tarefas do robô, detectar alvos (câmera) e navegar/mapear (lidar), com o menor custo de rede e de CPU; os equivalentes veiculares (câmera GMSL, lidar Ethernet) só mudariam o driver, não os tópicos, porque o pipeline já fala em <code>sensor_msgs</code> com <code>frame_id</code> do URDF.</li>
+</ul>
+
+<h2>5. Resultados</h2>
+<table class="res">
+  <tr><th>Medida</th><th>Resultado</th></tr>
+  <tr><td>Bringup com um comando (fig. 2 e 3)</td><td><code>./scripts/reproduzir.sh</code> num clone limpo: build dos 3 pacotes, Gazebo + 13 nós no ar (<code>gazebo</code>, <code>camera_controller</code>, <code>lidar_controller</code>, <code>esteiras</code>, <code>estados_juntas</code>, <code>robot_state_publisher</code>, <code>joint_state_publisher</code>, <code>slam_toolbox</code>, <code>rastreador_yolo</code>, <code>segmentador_yolo</code>, <code>servidor_engajar</code>, <code>piloto_demo</code>, RViz quando há tela); ordem Gazebo → spawn → juntas/SLAM/percepção → RViz → piloto respeitada pelo <code>OnProcessExit</code></td></tr>
+  <tr><td>Taxas medidas (<code>ros2 topic hz</code>, tempo simulado)</td><td><code>/scan</code> 10,0 Hz · <code>/camera/image_raw</code> 15,0 Hz (640×480) · <code>/vision/deteccoes</code> 5,1 Hz · <code>/vision/segmented</code> 2,9 Hz (3 Hz pedidos; 44 ms por quadro na CPU dividida com o Gazebo e o SLAM) · <code>/odom</code> 29 Hz · <code>/tf</code> 50 Hz</td></tr>
+  <tr><td>SLAM e mapa (fig. 4)</td><td>mapa de 119 × 120 células a 5 cm (origem −2,99, −2,98 m) salvo com <code>map_saver_cli</code> depois da rota: paredes da sala de 6 × 6 m, pilar, duas caixas, muro e os dois postes dos alvos reconhecíveis; 717 células ocupadas e 13 563 livres; <code>map → odom</code> publicado a 50 Hz</td></tr>
+  <tr><td>Árvore de TF (fig. 5)</td><td><code>view_frames</code>: 17 frames numa só árvore, <code>map → odom → base_footprint → base_link → {esteiras, 4 rodas, camera_link → camera_optical_link, mastro_link → lidar_link, torre_pan_link → torre_tilt_link → emissor_link}</code>; <code>map → base_footprint</code> consultado com <code>tf2_echo</code> antes e depois da rota</td></tr>
+  <tr><td>Rota do piloto (open loop)</td><td>quadrado de 1,4 m + giro de 360° em 45 s de tempo simulado; o robô não volta exatamente à origem (escorregamento das esteiras no Gazebo, 158° a cada 172° comandados no TP2), o que é justamente a deriva da odometria que o SLAM corrige em <code>map → odom</code></td></tr>
+  <tr><td>Engajamento na simulação</td><td>com o robô parado na origem olhando para os alvos impressos do mundo, o <code>cliente_engajar</code> (automático no bringup, ou chamado pelo <code>reproduzir.sh</code>) obteve <b>DISPARO em 0,8 s</b> no alvo #1 (9 feedbacks; erro 16,9 px médio → 1,0 px final; torre pan +8,2°, tilt −9,5°), result gravado em <code>engajamentos_tp3.csv</code>: a cadeia câmera simulada → detector → Kalman → mira funciona no Gazebo com a arte real do alvo</td></tr>
+  <tr><td>Segmentação: treino (validação sintética, 400 imagens, 385 alvos)</td><td>caixa: precisão 0,927, recall 0,822, mAP50 0,890, mAP50-95 0,739; <b>máscara: precisão 0,902, recall 0,789, mAP50 0,857, mAP50-95 0,619</b>; 11,3 min na GPU, 6,8 MB</td></tr>
+  <tr><td>Segmentação no vídeo do robô (fig. 7)</td><td>2 a 4 alvos por quadro conforme o enquadramento, confiança mediana 0,90 (mín. 0,26, máx. 0,96); 25 ms por quadro na CPU em 416 px (1280×720 de entrada); publicado a 10 Hz</td></tr>
+  <tr><td>Parâmetros em execução</td><td><code>ros2 param set /segmentador_yolo alpha 0.3</code> aplicado; <code>modelo inexistente.pt</code> recusado com a razão no log; perfil <code>params_uno_q.yaml</code> carregado com <code>ros2 param load</code> troca detector e segmentador para os modelos leves</td></tr>
+  <tr><td>Testes</td><td><code>colcon build</code> dos 3 pacotes sem avisos; <code>check_urdf</code> sem erros; <code>./scripts/reproduzir.sh</code> num clone limpo (sem janelas) completa as 4 etapas</td></tr>
+</table>
+
+<figure class="larga">
+  <img src="../evidencias/tp3/gazebo_bringup.jpg" alt="Gazebo Classic 11 com o mundo do projeto e o robô">
+  <img src="../evidencias/tp3/rviz_bringup.jpg" alt="RViz2 com o bringup no ar" style="margin-top:6px">
+  <figcaption>Fig. 2 — Capturas de tela do bringup subido com um comando. Em cima, o Gazebo Classic 11 com o mundo <code>sala_alvos.world</code>: sala, pilar, caixas, muro, as folhas com a arte real do alvo, a bola e o robô (fator de tempo real 1,0). Embaixo, o RViz2 com a configuração salva <code>rviz/bringup.rviz</code> ao fim da rota do piloto: o mapa do SLAM Toolbox (cinza = livre, preto = ocupado, verde-escuro = sombra dos obstáculos), o scan do lidar (pontos vermelhos), o robô (URDF) com a torre, a trilha da odometria (setas) e, à esquerda, as três imagens da percepção.</figcaption>
+</figure>
+<figure>
+  <div class="duas">
+    <img src="../evidencias/tp3/gazebo_segmented.jpg" alt="/vision/segmented na câmera do Gazebo">
+    <img src="../evidencias/tp3/gazebo_rastreamento.jpg" alt="/vision/rastreamento na câmera do Gazebo">
+  </div>
+  <figcaption>Fig. 3 — A câmera simulada (640×480, 15 Hz) no início do bringup, com o robô parado olhando para os alvos impressos do mundo <code>sala_alvos.world</code>: <code>/vision/segmented</code> (esquerda; três instâncias, a terceira meio escondida pela bola) e <code>/vision/rastreamento</code> (direita) sobre o mesmo <code>/camera/image_raw</code>. A saída completa do <code>reproduzir.sh</code> está em <code>docs/evidencias/tp3/reproduzir_saida.txt</code>.</figcaption>
+</figure>
+<figure>
+  <div class="duas">
+    <img src="../evidencias/tp3/mapa_tp3.png" alt="Mapa construído pelo SLAM Toolbox">
+    <img src="../evidencias/tp3/frames_tp3.png" alt="Árvore de TF (view_frames)">
+  </div>
+  <figcaption>Fig. 4 (esquerda) — <code>/map</code> salvo com <code>map_saver_cli</code> ao fim da rota: a sala de 6 × 6 m, o pilar (alto à esquerda), as duas caixas, o muro (embaixo) e os postes dos alvos (à direita); cinza = desconhecido (sombra dos obstáculos). Fig. 5 (direita) — árvore de TF do <code>view_frames</code> com o bringup no ar (PDF original em <code>docs/evidencias/tp3/frames_tp3.pdf</code>).</figcaption>
+</figure>
+
+<figure>
+  <div class="duas">
+    <img src="../evidencias/tp3/labels_seg_mosaico.jpg" alt="Mosaico de conferência dos polígonos de segmentação">
+    <img src="../evidencias/tp3/treino_seg_results.png" alt="Curvas do treino do YOLOv8n-seg">
+  </div>
+  <figcaption>Fig. 6 — Esquerda: conferência dos polígonos gerados sem re-render (máscara vermelha a 50%, contorno amarelo) em imagens de validação do dataset sintético; os contornos acompanham a elipse do alvo em perspectiva e a curvatura do papel. Direita: curvas do treino do YOLOv8n-seg (100 épocas; perdas de caixa, máscara e classe; mAP de caixa (B) e de máscara (M)).</figcaption>
+</figure>
+<figure>
+  <img src="../evidencias/tp3/segmentacao_video.jpg" alt="/vision/segmented no vídeo do robô">
+  <figcaption>Fig. 7 — <code>/vision/segmented</code> no vídeo do robô no campo de tiro: quatro instâncias da classe <code>alvo</code> com máscara vermelha a 50%, contorno, confiança e o centroide da máscara (cruz), que é o ponto de mira. Cabeçalho: modelo, limiar, taxa, tempo de inferência e transparência; legenda de cores por classe embaixo.</figcaption>
+</figure>
+
+<h2>6. Dificuldades e decisões</h2>
+<ul>
+  <li><b>Gazebo Classic 11 no lugar do Harmonic:</b> o enunciado pede o Harmonic, mas o simulador instalado, integrado ao Humble e validado no TP2 é o Classic 11. Migrar plugins, mundo e ponte (<code>ros_gz</code>) no prazo consumiria o tempo do SLAM e da segmentação; a decisão de manter o Classic foi explícita e está em <code>docs/decisoes.md</code>, com a migração como pendência.</li>
+  <li><b>Hardware do robô mudou (22/10):</b> Raspberry Pi 5 + Hailo-8 deram lugar ao Arduino UNO Q, sem acelerador. O YOLOv8s custa a placa inteira (0,3–1 fps); um YOLOv8n em 416 px custa 3× menos e deixa ~46% da CPU livre a 2 Hz. No PC a demo continua com o v8s (mais preciso) e o perfil <code>params_uno_q.yaml</code> troca para o v8n em execução.</li>
+  <li><b>Segmentação sem dataset de máscaras:</b> rotular 2400 imagens à mão era inviável; renderizar de novo com um passe de índice levaria mais de uma hora. Como o gerador reconstrói a cena pela semente, bastou remontar câmera e alvos e projetar o contorno: 37 s e 100% de concordância com as caixas. A máscara é amodal, como a caixa, para o centroide continuar sendo o centro do alvo mesmo com oclusão.</li>
+  <li><b>Junção NTFS × Ultralytics:</b> <code>dataset_seg/images</code> como junção para as imagens originais fez o treino ler os labels de caixa (o Ultralytics resolve o caminho real) e abortar. Resolvido com <em>hard links</em> por arquivo.</li>
+  <li><b>Duas fontes de <code>/joint_states</code>:</b> o plugin do Gazebo (torre em 0) e o <code>joint_state_publisher</code> (torre do servidor) publicavam no mesmo tópico e a torre piscava no RViz. O plugin passou a publicar só as rodas em <code>/gazebo/joint_states</code>, e o <code>joint_state_publisher</code> junta as duas fontes.</li>
+  <li><b>Câmera do Gazebo sem tela:</b> sem <code>DISPLAY</code>, o gzserver não renderiza a câmera (o lidar, que é CPU, continua); o <code>reproduzir.sh</code> avisa isso quando <code>/camera/image_raw</code> fica sem dados.</li>
+  <li><b>Processos órfãos:</b> uma saída por <code>set -e</code> no <code>reproduzir.sh</code> deixava o launch (Gazebo, SLAM, nós) rodando, e a execução seguinte falhava no spawn (“entity already exists”). Agora um <code>trap … EXIT</code> encerra o launch em qualquer saída.</li>
+  <li><b>Em aberto:</b> a torre ainda não é acionada no Gazebo (só no RViz, pelo servidor); migração para o Gazebo Harmonic; validação dos modelos com fotos reais do alvo impresso; o ocasional atraso de quadros do Fast-DDS registrado no TP2.</li>
+</ul>
+
+</body>
+</html>

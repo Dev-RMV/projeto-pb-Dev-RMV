@@ -4,9 +4,79 @@ ROS 2 Humble (Python) do Robo Sniper. Pacotes do workspace:
 
 | Pacote | Conteudo |
 |---|---|
-| `projeto_bloco` | nos, launch files, `config/params.yaml`, RViz do TP2, `modelos/alvo_yolov8s_640.pt` (detector de alvos) |
+| `projeto_bloco` | nos, launch files (`bringup.launch.py` do TP3, `tp2.launch.py`, `projeto_bloco.launch.py` do TP1), `config/*.yaml`, RViz, `modelos/*.pt` (detector de alvos v8s, detector leve v8n para o UNO Q e segmentador v8n-seg) |
 | `projeto_bloco_interfaces` | msg `DeteccaoObj`, `DeteccaoArray`, `Face`, `FaceArray`; srv `ControleArma`, `VisionStatus`, `FaceStatus`; action `EngajarAlvo` |
-| `projeto_bloco_description` | URDF/xacro do robo, RViz e Gazebo Classic 11 (mundo com alvos) |
+| `projeto_bloco_description` | URDF/xacro do robo, RViz, Gazebo Classic 11 (mundos `alvos.world` e `sala_alvos.world`) e o modelo `alvo_impresso` (folha com a arte real do alvo) |
+
+## TP3: bringup unico (Gazebo + URDF + SLAM Toolbox + percepcao + RViz) e segmentacao por instancia
+
+```
+                      bringup.launch.py (um comando; parametros em config/params.yaml + bringup.yaml + slam.yaml)
+ 1. gzserver/gzclient (sala_alvos.world) + robot_state_publisher (URDF)   2. spawn do robo
+ 3. (depois do spawn) joint_state_publisher <- /gazebo/joint_states + /torre/joint_states -> /joint_states
+    slam_toolbox: /scan -> /map, TF map->odom          (odom->base_footprint vem do diff drive do Gazebo)
+    camera do Gazebo -> /camera/image_raw -+-> rastreador_yolo -> /vision/deteccoes -> servidor_engajar -> /torre/visao
+                                            +-> segmentador_yolo -> /vision/segmented, /vision/segmentacao
+ 4. rviz2 -d rviz/bringup.rviz (Map, LaserScan, TF, RobotModel, Odometry, as 3 imagens)
+ 5. piloto_demo -> /cmd_vel (rota fixa: quadrado de 1,4 m + giro completo) -> mapa construido
+```
+
+| No | Faz | Publica / serve |
+|---|---|---|
+| `segmentador_yolo` | YOLOv8n-seg treinado para a classe `alvo` (mesmo dataset sintetico, poligonos do contorno; 416 px) em `frequencia_hz` sobre o frame mais recente; pinta as mascaras **por classe** com transparencia `alpha` (0,5), contorno por instancia, rotulo e o centroide da mascara (ponto de mira) | `/vision/segmented` (imagem), `/vision/segmentacao` (`DeteccaoArray`: caixa, confianca, id da instancia, cx/cy = centroide da mascara) |
+| `piloto_demo` | publica `/cmd_vel` numa rota de passos `reto <m> <m/s>`, `girar <graus> <graus/s>`, `parar <s>` (parametro `rota`), com o relogio do no (tempo simulado), e para no fim | `/cmd_vel` |
+| `slam_toolbox` (`async_slam_toolbox_node`, pacote `slam_toolbox`) | SLAM 2D online com o `/scan` do lidar simulado; `config/slam.yaml` (frames `map`/`odom`/`base_footprint`, resolucao 5 cm, alcance 12 m) | `/map`, TF `map -> odom` |
+
+### Rodar
+
+Na raiz do repositorio: `./scripts/reproduzir.sh` (compila, sobe o bringup, gera a arvore de TF, salva
+o mapa e engaja um alvo). Manualmente, cada terminal com `source ros2_ws/ambiente.sh` (os launch
+files `bringup.launch.py` e `tp2.launch.py` acham o venv do YOLO sozinhos, entao para eles basta o
+`source install/setup.bash`; o `ambiente.sh` continua necessario para `ros2 run` dos nos do YOLO):
+
+```bash
+cd ros2_ws && colcon build --symlink-install && source ambiente.sh
+ros2 launch projeto_bloco bringup.launch.py                    # tudo (gui:=false sem a janela do Gazebo)
+#   10 s depois do spawn o cliente_engajar arma a torre e envia 3 goals (bringup.yaml): a torre mira e
+#   dispara nos alvos (/torre/visao: MIRANDO -> TRAVADO -> DISPARO); engajar:=false desliga isso
+ros2 launch projeto_bloco bringup.launch.py piloto:=false      # e dirigir a mao:
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
+# outro terminal
+ros2 run tf2_tools view_frames --ros-args -p use_sim_time:=true          # frames.pdf: map -> odom -> base_footprint -> ...
+ros2 run tf2_ros tf2_echo map base_footprint --ros-args -p use_sim_time:=true
+ros2 run nav2_map_server map_saver_cli -f mapa --ros-args -p use_sim_time:=true   # mapa.pgm + mapa.yaml
+ros2 run projeto_bloco cliente_engajar --ros-args -p use_sim_time:=true # engaja um alvo visto pela camera simulada
+ros2 param set /segmentador_yolo alpha 0.8                              # mascaras mais opacas
+ros2 param load /rastreador_yolo $(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/params_uno_q.yaml  # perfil do UNO Q
+```
+
+### Frames de referencia (arvore de TF do bringup)
+
+`map` (fixo no mundo; origem onde o SLAM comecou) -> `odom` (odometria das esteiras: continua, mas
+deriva; o SLAM publica `map -> odom` com a correcao) -> `base_footprint` (projecao do robo no chao,
+REP 105) -> `base_link` (chassi, na altura dos eixos) -> `camera_link` -> `camera_optical_link` (z
+para a frente, x direita, y baixo: convencao das imagens), `mastro_link` -> `lidar_link` (origem do
+`/scan`), `torre_pan_link` -> `torre_tilt_link` -> `emissor_link` (origem do feixe), rodas e esteiras.
+Fixos vem do URDF; `torre_*` do `servidor_engajar`; rodas do Gazebo; `odom -> base_footprint` do
+plugin diff drive; `map -> odom` do SLAM Toolbox.
+
+### Notas do TP3
+
+- **Gazebo Classic 11, nao Harmonic**: decisao registrada em `docs/decisoes.md` (e o simulador
+  instalado e validado no TP2). O mundo `sala_alvos.world` tem obstaculos (pilar, caixas, muro) e tres
+  folhas A4 com a arte real do alvo como textura (`models/alvo_impresso`, exportado via
+  `gazebo_model_path` no `package.xml`), que o detector e o segmentador reconhecem.
+- **Tempo simulado**: `config/bringup.yaml` poe `use_sim_time: true` em todos os nos (`/**`). O
+  `servidor_engajar` usa `get_clock()` para a latencia das deteccoes e `/torre/joint_states`, entao os
+  carimbos ficam coerentes com o `/clock` do Gazebo.
+- **Juntas**: o plugin do Gazebo publica so as rodas em `/gazebo/joint_states`; o `joint_state_publisher`
+  junta com `/torre/joint_states` e publica `/joint_states`. Dois publicadores em `/joint_states` faziam a
+  torre piscar no RViz.
+- **Segmentacao**: as mascaras sao amodais (cobrem o alvo inteiro mesmo com algo na frente), como as
+  caixas do detector; o centroide da mascara e o ponto de mira. O modelo COCO `yolov8n-seg.pt` tambem
+  roda no no (`ros2 param set /segmentador_yolo modelo yolov8n-seg.pt`), mas nao tem a classe `alvo`.
+- **CPU**: na simulacao o rastreador roda a 5 Hz e o segmentador a 3 Hz (`bringup.yaml`), porque o Gazebo
+  e o SLAM tambem usam a CPU; na CPU do PC o v8n-seg leva ~27 ms por quadro em 416 px.
 
 ## TP2: rastreamento de alvos (YOLO) + action de engajamento + URDF
 

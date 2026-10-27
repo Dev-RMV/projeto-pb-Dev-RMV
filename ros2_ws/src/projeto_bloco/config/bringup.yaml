@@ -1,0 +1,27 @@
+# Parametros do bringup (TP3): valem para TODOS os nos lancados pelo bringup.launch.py, por cima
+# do config/params.yaml. O relogio e o do Gazebo (/clock), por isso use_sim_time em todos; sem isso
+# o SLAM e o TF misturam tempo real com tempo simulado e as transformadas expiram.
+/**:
+  ros__parameters:
+    use_sim_time: true
+
+# A camera no bringup e a do Gazebo (plugin do URDF, 640x480 a 15 Hz, 70 graus), nao o
+# camera_publisher; o rastreador, o segmentador e o servidor de engajamento leem o mesmo
+# /camera/image_raw de sempre. Ajustes so para a simulacao:
+/rastreador_yolo:
+  ros__parameters:
+    frequencia_hz: 5.0        # na simulacao a CPU e dividida com o Gazebo e o segmentador
+/segmentador_yolo:
+  ros__parameters:
+    frequencia_hz: 3.0
+
+# Engajamento automatico do bringup (argumento engajar:=true): o cliente_engajar arma a torre e
+# envia um goal por item de `classes`, em sequencia; tres goals na classe "alvo" = tres disparos
+# com o robo parado na origem olhando para os alvos impressos. O servidor escolhe o alvo mais
+# proximo da mira (o mesmo id se continuar visivel). Campos em 0 = padroes do servidor.
+/cliente_engajar:
+  ros__parameters:
+    classes: ["alvo", "alvo", "alvo"]
+    intervalo_s: 4.0
+    armar: true
+    arquivo_csv: ""

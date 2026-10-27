@@ -1,0 +1,2 @@
+data_hora,goal,classe_pedida,status,feedbacks,disparou,mensagem,id_alvo,classe,duracao_s,tempo_ate_deteccao_s,tempo_ate_disparo_s,ciclos,ciclos_com_alvo,erro_medio_px,erro_final_px,pan_final_graus,tilt_final_graus
+2026-10-27T13:24:55,1,alvo,SUCESSO,9,True,DISPARO em alvo #1 com erro 1.0 px apos 0.8 s,1,alvo,0.9,0.0,0.8,9,9,16.944,1.047,8.216,-9.467

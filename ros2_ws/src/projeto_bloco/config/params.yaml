@@ -70,6 +70,34 @@
     taxa_visao_hz: 10.0          # publicacao de /torre/visao
     # show (janela cv2.imshow com a mira) vem do argumento show:= do launch
 
+# ---------- TP3: segmentacao por instancia e piloto da demo (bringup com Gazebo + SLAM) ----------
+/segmentador_yolo:
+  ros__parameters:
+    # YOLOv8n-seg treinado para a classe "alvo" (mesmo dataset sintetico do detector, com os
+    # poligonos do contorno do alvo); entrada 416 px. Nome sem caminho: como no rastreador.
+    modelo: "alvo_yolov8n_seg_416.pt"
+    pasta_modelos: "~/.cache/projeto_bloco/modelos"
+    confianca: 0.3               # limiar de maior F1 do v8n-seg na validacao sintetica
+    iou: 0.5
+    frequencia_hz: 5.0           # inferencia + publicacao de /vision/segmented (0.2-30)
+    imgsz: 416                   # o modelo foi treinado com 416
+    dispositivo: "cpu"
+    threads_cpu: 4
+    alpha: 0.5                   # transparencia das mascaras sobre o frame
+    topico_entrada: "/camera/image_raw"
+    # show (janela cv2.imshow) vem do argumento show:= do launch
+
+/piloto_demo:
+  ros__parameters:
+    # quadrado de 1,4 m no quadrante +x/+y da sala (sala_alvos.world) e um giro completo no fim,
+    # para o lidar varrer tudo; os obstaculos do mundo ficam a mais de 0,5 m desta rota
+    rota: ["parar 3", "reto 1.4 0.25", "girar 90 45", "reto 1.4 0.25", "girar 90 45",
+           "reto 1.4 0.25", "girar 90 45", "reto 1.4 0.25", "girar 90 45", "girar 360 30"]
+    repetir: 1
+    espera_inicial_s: 30.0       # Gazebo e SLAM assentam e o cliente_engajar do reproduzir.sh engaja
+                                 # um alvo com o robo ainda parado olhando para os alvos
+    taxa_hz: 20.0
+
 /cliente_engajar:
   ros__parameters:
     classes: ["alvo"]            # um goal por item, em sequencia

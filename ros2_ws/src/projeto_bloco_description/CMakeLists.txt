@@ -3,7 +3,7 @@ project(projeto_bloco_description)
 
 find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY launch rviz urdf worlds
+install(DIRECTORY launch rviz urdf worlds models
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()

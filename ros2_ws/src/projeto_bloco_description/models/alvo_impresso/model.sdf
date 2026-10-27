@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!-- Folha A4 (0,210 x 0,297 m) com a arte real do alvo, em pe, como uma placa de 4 mm.
+     A textura e a mesma imagem impressa e usada no treino do detector (ver ARTEFATOS.md). -->
+<sdf version="1.6">
+  <model name="alvo_impresso">
+    <static>true</static>
+    <link name="folha">
+      <collision name="folha">
+        <geometry><box><size>0.004 0.210 0.297</size></box></geometry>
+      </collision>
+      <visual name="folha">
+        <geometry><box><size>0.004 0.210 0.297</size></box></geometry>
+        <material>
+          <script>
+            <uri>model://alvo_impresso/materials/scripts</uri>
+            <uri>model://alvo_impresso/materials/textures</uri>
+            <name>AlvoImpresso/Folha</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -7,19 +7,25 @@
 # aqui pelo script que o produz, ou é baixado do link PÚBLICO registrado em ARTEFATOS.md —
 # nesse caso, deixe documentado ao lado o comando que o gerou.
 #
-# Este projeto (TP2): basta ./scripts/reproduzir.sh — se faltar dependência ele chama setup.sh sozinho.
-#   Sobe o tp2.launch.py: camera_publisher (ros2_ws/midia/alvos_dv20.mp4, robo no campo de tiro)
-#   -> rastreador_yolo (YOLOv8s treinado para alvos + ByteTrack + filtro de Kalman) -> servidor_engajar
-#   (action /engajar_alvo + servico /arma/controle) e o URDF do robo no robot_state_publisher; com
-#   DISPLAY abre as janelas OpenCV e o RViz. Neste terminal roda em seguida:
-#     1) cliente_engajar: arma a torre e engaja um "alvo" (feedback a cada ciclo, result com
-#        metricas no log e em ros2_ws/log/engajamentos.csv);
-#     2) cliente_engajar com cancelamento no meio do goal;
-#     3) scripts/demo_parametros.sh: ros2 param get/set/load/dump no /rastreador_yolo.
-#   Depois o sistema fica no ar ate Ctrl+C (outro terminal: source ros2_ws/ambiente.sh).
-#   Uso: ./scripts/reproduzir.sh                 (alvos_dv20.mp4)
-#        ./scripts/reproduzir.sh source:=0       (camera 0; ou source:=/caminho/outro.mp4)
-#        SEM_DEMO=1 ./scripts/reproduzir.sh      (so sobe o sistema, sem os clientes)
+# Este projeto (TP3): basta ./scripts/reproduzir.sh — se faltar dependência ele chama setup.sh sozinho.
+#   Sobe o bringup.launch.py com UM comando: Gazebo Classic 11 (mundo sala_alvos.world: sala com
+#   obstáculos e alvos impressos com a arte real) + robot_state_publisher (URDF) + spawn do robô
+#   + SLAM Toolbox (/scan -> /map, TF map->odom) + percepção do TP2 (rastreador_yolo com Kalman,
+#   servidor_engajar) + segmentador_yolo do TP3 (/vision/segmented) + RViz2 (rviz/bringup.rviz)
+#   + piloto_demo (rota fixa do config/params.yaml para o mapa ser construído). Parâmetros via YAML
+#   (config/params.yaml, bringup.yaml, slam.yaml). Sem DISPLAY, sobe sem as janelas.
+#   Neste terminal roda em seguida, depois de o SLAM publicar o mapa:
+#     1) cliente_engajar: arma a torre e engaja um "alvo" visto pela câmera simulada, com o robô
+#        ainda parado na origem (o piloto espera 30 s antes de andar); CSV no log;
+#     2) ros2 run tf2_tools view_frames  -> ros2_ws/log/frames_tp3.pdf (árvore map->odom->base...);
+#     3) espera a rota do piloto e salva o mapa (map_saver_cli) -> ros2_ws/log/mapa_tp3.{pgm,yaml};
+#     4) salvar_imagens: um quadro de /vision/segmented, /vision/rastreamento, /torre/visao e da
+#        câmera -> ros2_ws/log/evidencias/.
+#   Depois o sistema fica no ar até Ctrl+C (outro terminal: source ros2_ws/ambiente.sh).
+#   Uso: ./scripts/reproduzir.sh                 (bringup completo)
+#        ./scripts/reproduzir.sh gui:=false      (sem a janela do Gazebo; qualquer arg:= vai ao launch)
+#        SEM_DEMO=1 ./scripts/reproduzir.sh      (só sobe o sistema, sem view_frames/mapa/cliente)
+#        ./scripts/reproduzir_tp2.sh             (demo do TP2: vídeo + action + parâmetros)
 set -e
 cd "$(dirname "$0")/.."
 RAIZ="$(pwd)"
@@ -29,7 +35,8 @@ VENV=ros2_ws/.venv
 if [ ! -f /opt/ros/humble/setup.bash ] || \
    ! dpkg -s ros-humble-cv-bridge python3-opencv opencv-data python3-colcon-common-extensions build-essential \
              ros-humble-rviz2 ros-humble-xacro ros-humble-robot-state-publisher ros-humble-joint-state-publisher \
-             ros-humble-tf2-tools >/dev/null 2>&1 || \
+             ros-humble-tf2-tools ros-humble-gazebo-ros-pkgs ros-humble-slam-toolbox ros-humble-nav2-map-server \
+             >/dev/null 2>&1 || \
    ! "$VENV/bin/python" -c "import ultralytics, lap" >/dev/null 2>&1; then
   echo "[reproduzir] faltam dependências: rodando ./scripts/setup.sh (pede sudo; alguns minutos)"
   ./scripts/setup.sh
@@ -43,58 +50,73 @@ cd ..
 source ros2_ws/ambiente.sh          # workspace + venv do YOLO no PYTHONPATH + perfil Fast-DDS
 
 # ---------- 2. OBTER INSUMOS ----------
-# Video e modelo versionados no repositorio (origem e comando de geracao em ARTEFATOS.md):
-#   ros2_ws/midia/alvos_dv20.mp4  1280x720, 30 fps, 24 s: robo andando e girando num campo de tiro
-#                                 com 5 alvos (render do Blender com a "cara" da camera DV20)
-#   ros2_ws/src/projeto_bloco/modelos/alvo_yolov8s_640.pt  YOLOv8s treinado para a classe "alvo"
-VIDEO="$RAIZ/ros2_ws/midia/alvos_dv20.mp4"
-MODELO="$RAIZ/ros2_ws/src/projeto_bloco/modelos/alvo_yolov8s_640.pt"
-for f in "$VIDEO" "$MODELO"; do
+# Modelos versionados no repositório (origem e comando de geração em ARTEFATOS.md):
+#   ros2_ws/src/projeto_bloco/modelos/alvo_yolov8s_640.pt      detector de alvos (TP2, padrão no PC)
+#   ros2_ws/src/projeto_bloco/modelos/alvo_yolov8n_416.pt      detector para o Arduino UNO Q (params_uno_q.yaml)
+#   ros2_ws/src/projeto_bloco/modelos/alvo_yolov8n_seg_416.pt  segmentação por instância (TP3)
+# Mundo, modelo do alvo impresso (arte real como textura) e URDF: projeto_bloco_description.
+for f in ros2_ws/src/projeto_bloco/modelos/alvo_yolov8s_640.pt ros2_ws/src/projeto_bloco/modelos/alvo_yolov8n_seg_416.pt \
+         ros2_ws/src/projeto_bloco_description/models/alvo_impresso/materials/textures/alvo_impresso.png \
+         ros2_ws/midia/alvos_dv20.mp4; do
   [ -f "$f" ] || { echo "[reproduzir] arquivo nao encontrado: $f"; exit 1; }
 done
-echo "[reproduzir] modelo: $(ls -sh "$MODELO")"
-# Pesos YOLO11n (COCO) oficiais da Ultralytics: so para a demo de troca de modelo em execucao
-# (demo_parametros.sh). Baixados do release publico para a pasta_modelos do config/params.yaml.
-MODELOS="$HOME/.cache/projeto_bloco/modelos"
-mkdir -p "$MODELOS"
-"$VENV/bin/python" -c "from ultralytics import YOLO; YOLO('$MODELOS/yolo11n.pt')" >/dev/null
+echo "[reproduzir] modelos: $(ls -sh ros2_ws/src/projeto_bloco/modelos/*.pt | tr '\n' ' ')"
+# Modelos do ground_plane e do sun do Gazebo: vêm com o gazebo11 (/usr/share/gazebo-11/models).
 
 # ---------- 3. DEMONSTRAÇÃO DO TP CORRENTE ----------
-SHOW=true
-[ -z "$DISPLAY" ] && { SHOW=false; echo "[reproduzir] sem DISPLAY: sem janelas nem RViz (imagens em /vision/rastreamento e /torre/visao)"; }
+GUI=true
+[ -z "$DISPLAY" ] && { GUI=false; echo "[reproduzir] sem DISPLAY: Gazebo sem janela e sem RViz (imagens em /vision/segmented, /vision/rastreamento, /torre/visao)"; }
 mkdir -p ros2_ws/log
 # set -m so para iniciar o launch: sem controle de jobs o bash inicia o job em 2o plano com SIGINT
 # ignorado e o `kill -INT` do trap nao o encerraria
 set -m
-ros2 launch projeto_bloco tp2.launch.py "source:=$VIDEO" show:=$SHOW rviz:=$SHOW "$@" > ros2_ws/log/reproduzir.log 2>&1 &
+# engajar:=false: o proprio script roda o cliente_engajar abaixo (com CSV) em vez do automatico do launch
+ros2 launch projeto_bloco bringup.launch.py gui:=$GUI rviz:=$GUI show:=false engajar:=false "$@" > ros2_ws/log/reproduzir.log 2>&1 &
 LAUNCH=$!
 set +m
-trap 'echo; echo "[reproduzir] encerrando"; kill -INT $LAUNCH 2>/dev/null; wait $LAUNCH 2>/dev/null; exit 0' INT TERM
-for i in $(seq 1 60); do   # action server no ar e rastreador com o modelo carregado
-  ros2 action list 2>/dev/null | grep -q "/engajar_alvo" && \
-    ros2 topic list 2>/dev/null | grep -q "/vision/deteccoes" && break
+# Ctrl+C, kill ou qualquer saída do script (set -e) encerram o launch inteiro (Gazebo, SLAM, nós)
+encerrar() {
+  trap - INT TERM EXIT; echo; echo "[reproduzir] encerrando"
+  kill -INT $LAUNCH 2>/dev/null
+  for i in $(seq 1 20); do kill -0 $LAUNCH 2>/dev/null || break; sleep 1; done   # o Gazebo demora a sair
+  kill -0 $LAUNCH 2>/dev/null && { echo "[reproduzir] forçando"; kill -KILL -- -$LAUNCH 2>/dev/null; }
+  wait $LAUNCH 2>/dev/null; exit 0
+}
+trap encerrar INT TERM EXIT
+echo "[reproduzir] subindo Gazebo, SLAM e percepção (log em ros2_ws/log/reproduzir.log)"
+for i in $(seq 1 180); do   # SLAM com mapa, segmentador e action server no ar
+  ros2 topic list 2>/dev/null | grep -q "^/map$" && \
+    ros2 topic list 2>/dev/null | grep -q "^/vision/segmented$" && \
+    ros2 action list 2>/dev/null | grep -q "/engajar_alvo" && break
   kill -0 $LAUNCH 2>/dev/null || { echo "[reproduzir] launch morreu:"; tail -20 ros2_ws/log/reproduzir.log; exit 1; }
   sleep 1
 done
-echo "[reproduzir] nós:";        ros2 node list --no-daemon --spin-time 2 | sed 's/^/   /'
-echo "[reproduzir] interfaces:"; ros2 interface list | grep projeto_bloco_interfaces | sed 's/^ */   /'
-echo "[reproduzir] action:";     ros2 action list -t | sed 's/^/   /'
-echo "[reproduzir] serviço:";    ros2 service list -t | grep arma | sed 's/^/   /'
-echo "[reproduzir] log dos nós: ros2_ws/log/reproduzir.log"
+echo "[reproduzir] nós:";    ros2 node list --no-daemon --spin-time 3 | sed 's/^/   /'
+echo "[reproduzir] tópicos:"; ros2 topic list | grep -E "^/(map|scan|odom|tf|camera/image_raw|vision|torre|joint_states|cmd_vel)" | sed 's/^/   /'
+echo "[reproduzir] taxas:"
+for t in /scan /camera/image_raw /vision/segmented /vision/deteccoes; do
+  printf '   %-24s' "$t"; timeout 6 ros2 topic hz $t 2>/dev/null | grep -m1 average || echo "sem dados (a câmera do Gazebo precisa de um DISPLAY para renderizar)"
+done
 
 if [ -z "$SEM_DEMO" ]; then
-  CSV="$RAIZ/ros2_ws/log/engajamentos.csv"
-  echo; echo "[reproduzir] ===== 1) action client: engajar um alvo ====="
-  ros2 run projeto_bloco cliente_engajar --ros-args -p "arquivo_csv:=$CSV" || true
-  echo; echo "[reproduzir] ===== 2) action client: goal cancelado depois de 2 s ====="
-  ros2 run projeto_bloco cliente_engajar --ros-args \
-    -p tempo_travar_s:=5.0 -p cancelar_apos_s:=2.0 -p "arquivo_csv:=$CSV" || true
-  echo; echo "[reproduzir] ===== 3) parametros: YAML + alteracao dinamica ====="
-  bash ./scripts/demo_parametros.sh || true
-  echo; echo "[reproduzir] results registrados em $CSV"
+  echo; echo "[reproduzir] ===== 1) action client: engajar um alvo visto pela câmera simulada (robô ainda parado) ====="
+  timeout 60 ros2 run projeto_bloco cliente_engajar --ros-args -p "arquivo_csv:=$RAIZ/ros2_ws/log/engajamentos_tp3.csv" -p use_sim_time:=true || true
+  echo; echo "[reproduzir] ===== 2) árvore de TF (tf2_tools view_frames) ====="
+  ( cd ros2_ws/log && timeout 30 ros2 run tf2_tools view_frames -o frames_tp3 --ros-args -p use_sim_time:=true >/dev/null 2>&1 || true )
+  ls ros2_ws/log/frames_tp3.pdf >/dev/null 2>&1 && echo "   ros2_ws/log/frames_tp3.pdf" || echo "   (view_frames nao gerou o pdf)"
+  echo "   map -> base_footprint agora:"
+  timeout 6 ros2 run tf2_ros tf2_echo map base_footprint --ros-args -p use_sim_time:=true 2>/dev/null | grep -m2 -E "Translation|RPY" | sed 's/^/   /' || true
+  echo; echo "[reproduzir] ===== 3) rota do piloto_demo (quadrado de 1,4 m + giro; ~45 s) e mapa do SLAM ====="
+  for i in $(seq 1 7); do sleep 10; printf '   %ds...' $((i * 10)); done; echo
+  timeout 6 ros2 run tf2_ros tf2_echo map base_footprint --ros-args -p use_sim_time:=true 2>/dev/null | grep -m2 -E "Translation|RPY" | sed 's/^/   /' || true
+  timeout 25 ros2 run nav2_map_server map_saver_cli -f ros2_ws/log/mapa_tp3 --ros-args -p use_sim_time:=true 2>&1 | grep -E "Map saved|Failed|error" | sed 's/^/   /' || true
+  ls ros2_ws/log/mapa_tp3.pgm >/dev/null 2>&1 && echo "   ros2_ws/log/mapa_tp3.pgm + .yaml"
+  echo; echo "[reproduzir] ===== 4) quadros das imagens publicadas (ros2_ws/log/evidencias) ====="
+  timeout 40 ros2 run projeto_bloco salvar_imagens --ros-args -p "pasta:=$RAIZ/ros2_ws/log/evidencias" -p timeout_s:=30.0 2>&1 | grep -E "\->|timeout" | sed 's/^/   /' || true
 fi
 echo; echo "[reproduzir] sistema no ar (Ctrl+C encerra). Em outro terminal: source ros2_ws/ambiente.sh"
+echo "   ros2 run teleop_twist_keyboard teleop_twist_keyboard      # dirigir (piloto_demo ja parou)"
 echo "   ros2 run projeto_bloco cliente_engajar"
-echo "   ros2 action send_goal /engajar_alvo projeto_bloco_interfaces/action/EngajarAlvo \"{classe: 'alvo'}\" --feedback"
+echo "   ros2 param load /rastreador_yolo \$(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/params_uno_q.yaml"
 wait $LAUNCH
 echo "[reproduzir] concluído"

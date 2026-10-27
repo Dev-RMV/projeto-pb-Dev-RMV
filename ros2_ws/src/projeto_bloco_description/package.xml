@@ -21,5 +21,7 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <!-- model://alvo_impresso (folha com a arte real do alvo) para o gzserver -->
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
   </export>
 </package>

@@ -6,7 +6,8 @@
     lidar   -> /scan (sensor_msgs/LaserScan, 360 amostras, 0,15-12 m, como um RPLIDAR A1)
     esteiras-> /cmd_vel -> /odom + TF odom->base_footprint. A lagarta nao e simulada: as duas rodas
                de cada lado sao acionadas juntas (skid steer), que e o efeito da lagarta.
-    juntas  -> /joint_states (rodas e torre)
+    juntas  -> /gazebo/joint_states (so as rodas; a torre vem do servidor_engajar, e o
+               joint_state_publisher junta as duas fontes em /joint_states)
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
@@ -124,16 +125,21 @@
     </plugin>
   </gazebo>
 
-  <!-- ===== estados das juntas ===== -->
+  <!-- ===== estados das juntas (so as rodas) =====
+       Publica em /gazebo/joint_states, nao em /joint_states: no bringup o joint_state_publisher junta
+       estas rodas com a torre (que vem do servidor_engajar em /torre/joint_states) e publica o
+       /joint_states unico que o robot_state_publisher le. Dois publicadores em /joint_states (este
+       plugin com a torre em 0 e o joint_state_publisher) faziam a torre piscar no RViz. -->
   <gazebo>
     <plugin name="estados_juntas" filename="libgazebo_ros_joint_state_publisher.so">
+      <ros>
+        <remapping>joint_states:=/gazebo/joint_states</remapping>
+      </ros>
       <update_rate>20</update_rate>
       <joint_name>roda_motriz_esq_joint</joint_name>
       <joint_name>roda_motriz_dir_joint</joint_name>
       <joint_name>roda_guia_esq_joint</joint_name>
       <joint_name>roda_guia_dir_joint</joint_name>
-      <joint_name>torre_pan_joint</joint_name>
-      <joint_name>torre_tilt_joint</joint_name>
     </plugin>
   </gazebo>
 

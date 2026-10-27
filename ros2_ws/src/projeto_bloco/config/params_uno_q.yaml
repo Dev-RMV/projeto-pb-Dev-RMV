@@ -1,0 +1,24 @@
+# Perfil para o hardware de destino: Arduino UNO Q (Qualcomm QRB2210, 4 x Cortex-A53, sem
+# acelerador de IA; ROS 2 Humble em Docker) com a camera DV20 em 640x480.
+# Medido na placa (benchmark do projeto do robo real, fora deste repositorio, 22-23/10/2026): o
+# YOLOv8s 640 leva 0,95-3,4 s por inferencia e ocupa a placa inteira; o YOLOv8n treinado em 416,
+# inferindo em 320 a 2 Hz em torch com 2 threads, deixa ~46% da CPU livre para os outros nos.
+# Limiar 0,30 = maior F1 do v8n na validacao (0,57 no v8s). O rastreador segue com o Kalman entre
+# inferencias; o perfil tambem serve para testar no PC:
+#   ros2 param load /rastreador_yolo $(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/params_uno_q.yaml
+#   ros2 param load /segmentador_yolo ... (mesmo arquivo)
+/rastreador_yolo:
+  ros__parameters:
+    modelo: "alvo_yolov8n_416.pt"
+    confianca: 0.3
+    frequencia_hz: 2.0
+    imgsz: 320
+    threads_cpu: 2
+    perda_max_s: 2.0            # entre inferencias a 2 Hz o id precisa sobreviver mais tempo
+/segmentador_yolo:
+  ros__parameters:
+    modelo: "alvo_yolov8n_seg_416.pt"
+    confianca: 0.3
+    frequencia_hz: 1.0
+    imgsz: 320
+    threads_cpu: 2

@@ -7,7 +7,7 @@ package_name = 'projeto_bloco'
 
 setup(
     name=package_name,
-    version='2.0.0',
+    version='3.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -22,7 +22,7 @@ setup(
     zip_safe=True,
     maintainer='rmv',
     maintainer_email='rmv@todo.todo',
-    description='Robo Sniper: visao TP1; YOLO + Kalman e action de engajamento TP2',
+    description='Robo Sniper: visao TP1; YOLO + Kalman e action de engajamento TP2; bringup Gazebo + SLAM e segmentacao TP3',
     license='MIT',
     extras_require={'test': ['pytest']},
     entry_points={
@@ -33,6 +33,9 @@ setup(
             'rastreador_yolo = projeto_bloco.rastreador_yolo:main',
             'servidor_engajar = projeto_bloco.servidor_engajar:main',
             'cliente_engajar = projeto_bloco.cliente_engajar:main',
+            'segmentador_yolo = projeto_bloco.segmentador_yolo:main',
+            'piloto_demo = projeto_bloco.piloto_demo:main',
+            'salvar_imagens = projeto_bloco.salvar_imagens:main',
         ],
     },
 )
