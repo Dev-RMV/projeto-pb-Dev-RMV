@@ -1,0 +1,23 @@
+
+Files:             bag_patrulha_0.db3
+Bag size:          6.8 MiB
+Storage id:        sqlite3
+Duration:          84.237761350s
+Start:             Nov 23 2026 07:58:34.724516584 (1795431514.724516584)
+End:               Nov 23 2026 07:59:58.962277934 (1795431598.962277934)
+Messages:          10668
+Topic information: Topic: /tf | Type: tf2_msgs/msg/TFMessage | Count: 4099 | Serialization Format: cdr
+                   Topic: /arvore/distancia_frontal | Type: std_msgs/msg/Float32 | Count: 831 | Serialization Format: cdr
+                   Topic: /arma/disparo | Type: projeto_bloco_interfaces/msg/DeteccaoObj | Count: 3 | Serialization Format: cdr
+                   Topic: /map | Type: nav_msgs/msg/OccupancyGrid | Count: 1 | Serialization Format: cdr
+                   Topic: /patrulha/status | Type: std_msgs/msg/String | Count: 14 | Serialization Format: cdr
+                   Topic: /tf_static | Type: tf2_msgs/msg/TFMessage | Count: 1 | Serialization Format: cdr
+                   Topic: /arvore/estado | Type: std_msgs/msg/String | Count: 829 | Serialization Format: cdr
+                   Topic: /obstaculo_surpresa/status | Type: std_msgs/msg/String | Count: 1 | Serialization Format: cdr
+                   Topic: /cmd_vel | Type: geometry_msgs/msg/Twist | Count: 1444 | Serialization Format: cdr
+                   Topic: /amcl_pose | Type: geometry_msgs/msg/PoseWithCovarianceStamped | Count: 168 | Serialization Format: cdr
+                   Topic: /odom | Type: nav_msgs/msg/Odometry | Count: 2440 | Serialization Format: cdr
+                   Topic: /patrulha/rota | Type: nav_msgs/msg/Path | Count: 1 | Serialization Format: cdr
+                   Topic: /scan | Type: sensor_msgs/msg/LaserScan | Count: 830 | Serialization Format: cdr
+                   Topic: /plan | Type: nav_msgs/msg/Path | Count: 6 | Serialization Format: cdr
+

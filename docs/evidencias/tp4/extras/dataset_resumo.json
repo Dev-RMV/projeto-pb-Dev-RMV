@@ -1,0 +1,131 @@
+{
+  "total": 500,
+  "pedido": 500,
+  "completo": true,
+  "classes": [
+    "via_livre",
+    "obstaculo",
+    "cruzamento"
+  ],
+  "resolucao": [
+    320,
+    180
+  ],
+  "frames_por_particao_e_classe": {
+    "treino": {
+      "via_livre": 117,
+      "obstaculo": 117,
+      "cruzamento": 116
+    },
+    "validacao": {
+      "via_livre": 25,
+      "obstaculo": 25,
+      "cruzamento": 25
+    },
+    "teste": {
+      "via_livre": 25,
+      "obstaculo": 25,
+      "cruzamento": 25
+    }
+  },
+  "frames_por_classe": {
+    "via_livre": 167,
+    "obstaculo": 167,
+    "cruzamento": 166
+  },
+  "sementes_usadas": {
+    "treino": [
+      1000,
+      1025,
+      26
+    ],
+    "validacao": [
+      3000,
+      3008,
+      9
+    ],
+    "teste": [
+      5000,
+      5006,
+      7
+    ]
+  },
+  "obstaculos": {
+    "origem": {
+      "cena": 8,
+      "colocado": 159
+    },
+    "tipo_dos_colocados": {
+      "barreira": 36,
+      "cones": 46,
+      "triangulo": 45,
+      "veiculo": 32
+    }
+  },
+  "blocos_dos_frames": {
+    "via_livre": {
+      "C": 33,
+      "I": 107,
+      "S": 27
+    },
+    "obstaculo": {
+      "C": 59,
+      "I": 80,
+      "S": 28
+    },
+    "cruzamento": {
+      "T": 131,
+      "X": 35
+    }
+  },
+  "limiares": {
+    "obstaculo_max_m": 20.0,
+    "livre_min_m": 40.0,
+    "entrada_cruzamento_m": 18.0,
+    "resto_cruzamento_m": 10.0,
+    "saida_cruzamento_m": 15.0,
+    "lateral_max_m": 0.9
+  },
+  "blocos_do_mapa": {
+    "Curve": 0.2,
+    "Straight": 0.2,
+    "StdInterSection": 0.3,
+    "StdTInterSection": 0.3
+  },
+  "blocos_por_mapa": 4,
+  "trafego": 0.15,
+  "acidentes": 0.3,
+  "amostragem_por_episodio": {
+    "via_livre": {
+      "maximo": 10,
+      "metros_entre_frames": 8.0
+    },
+    "obstaculo": {
+      "maximo": 12,
+      "metros_entre_frames": 4.0
+    },
+    "cruzamento": {
+      "maximo": 12,
+      "metros_entre_frames": 2.5
+    }
+  },
+  "obstaculos_colocados_m": {
+    "cones": [
+      7.0,
+      19.0
+    ],
+    "barreira": [
+      7.0,
+      19.0
+    ],
+    "veiculo": [
+      8.0,
+      19.0
+    ],
+    "triangulo": [
+      7.0,
+      12.0
+    ]
+  },
+  "tempo_s": 389.3
+}

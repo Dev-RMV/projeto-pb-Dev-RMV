@@ -1,0 +1,13 @@
+# Dependencias Python do pacote tp4_extras (TP4: percepcao veicular no MetaDrive e CNN em Keras),
+# instaladas pelo scripts/setup.sh (ou pelo scripts/reproduzir_tp4_extras.sh) no venv
+# ros2_ws/.venv_tp4. E um venv separado do ros2_ws/.venv do YOLO: aqui o numpy e o 2.x que o
+# TensorFlow e o MetaDrive resolvem; la ele fica em 1.26 por causa do cv_bridge do Humble.
+# Versoes fixas = as testadas em 23/11/2026 (Ubuntu 22.04, Python 3.10).
+#   ros2_ws/.venv_tp4/bin/pip install -r requirements_tp4_extras.txt
+metadrive-simulator==0.4.3   # simulador (panda3d 1.10.13); baixa ~170 MB de assets na 1a execucao
+gymnasium==1.4.0
+tensorflow==2.21.0           # CPU; com placa NVIDIA o setup.sh instala tambem o extra and-cuda
+keras==3.12.4
+numpy==2.2.6
+opencv-python==5.1.0.95
+matplotlib==3.10.9

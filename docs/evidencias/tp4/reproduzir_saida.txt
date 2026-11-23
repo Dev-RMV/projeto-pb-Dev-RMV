@@ -1,0 +1,128 @@
+Starting >>> projeto_bloco_description
+Starting >>> projeto_bloco_interfaces
+Finished <<< projeto_bloco_description [1.11s]
+Finished <<< projeto_bloco_interfaces [6.08s]
+Starting >>> projeto_bloco
+Finished <<< projeto_bloco [0.88s]
+
+Summary: 3 packages finished [7.09s]
+
+[reproduzir] ===== 1) patrulha com Nav2 + behavior tree, gravando o bag (log em ros2_ws/log/tp4/reproduzir.log) =====
+   [INFO] [launch.user]: [navegacao] 1/3 Gazebo + robot_state_publisher
+   [INFO] [launch.user]: [navegacao] 2/3 spawn do robo (aguarda o gzserver)
+   [INFO] [launch.user]: [navegacao] robo no Gazebo: subindo Nav2, percepcao, RViz, arvore, obstaculo surpresa, gravacao e patrulha
+   [INFO] [obstaculo_surpresa]: gatilho em (0.80, 1.37), raio 0.30 m; caixa a 0.55 m do lidar
+   [INFO] [lifecycle_manager_localization]: Managed nodes are active
+   [INFO] [arvore_navegacao]: Arvore no ar. Tick a cada 0.10 s; pausa de 2.0 s com obstaculo a menos de 0.50 m no setor frontal de 60 graus. Goals em /navegar_com_pausa.
+   [INFO] [patrulha]: rota: posto_alvo_2 -> posto_alvo_1 -> posto_alvo_3 -> vigia_oeste -> base (1 volta(s)), goals em /navegar_com_pausa
+   [INFO] [patrulha]: lifecycle_manager_localization: ativo
+   [INFO] [lifecycle_manager_navigation]: Managed nodes are active
+   [INFO] [patrulha]: lifecycle_manager_navigation: ativo
+   [INFO] [patrulha]: localizado no mapa: (0.00, 0.00), 0 graus
+   [INFO] [patrulha]: [1/5] indo para posto_alvo_2: (1.30, -1.61), 23 graus
+   [INFO] [arvore_navegacao]: goal recebido: (1.30, -1.61) no frame map
+   [INFO] [arvore_navegacao]: NavegarParaPose: RUNNING  (goal (1.30, -1.61) enviado ao Nav2)
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (NAVEGANDO)
+   [INFO] [arvore_navegacao]: NavegarParaPose: SUCCESS  (o Nav2 chegou ao goal)
+   [INFO] [arvore_navegacao]: --- raiz: SUCCESS ---  (CHEGOU)
+   [INFO] [patrulha]: [1/5] CHEGOU em posto_alvo_2 em 14.8 s (erro 0.211 m, 8.6 graus)
+   [INFO] [patrulha]: /arma/controle: arma ARMADA: goals de /engajar_alvo liberados
+   [INFO] [patrulha]: posto_alvo_2: DISPARO em 1.1 s (erro final 2.0 px, alvo #20)
+   [INFO] [patrulha]: [2/5] indo para posto_alvo_1: (0.70, 0.30), 0 graus
+   [INFO] [arvore_navegacao]: goal recebido: (0.70, 0.30) no frame map
+   [INFO] [arvore_navegacao]: NavegarParaPose: RUNNING  (goal (0.70, 0.30) enviado ao Nav2)
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (NAVEGANDO)
+   [INFO] [arvore_navegacao]: NavegarParaPose: SUCCESS  (o Nav2 chegou ao goal)
+   [INFO] [arvore_navegacao]: --- raiz: SUCCESS ---  (CHEGOU)
+   [INFO] [patrulha]: [2/5] CHEGOU em posto_alvo_1 em 14.1 s (erro 0.255 m, -8.6 graus)
+   [INFO] [patrulha]: posto_alvo_1: DISPARO em 0.5 s (erro final 8.9 px, alvo #52)
+   [INFO] [patrulha]: [3/5] indo para posto_alvo_3: (1.44, 1.60), 0 graus
+   [INFO] [arvore_navegacao]: goal recebido: (1.44, 1.60) no frame map
+   [INFO] [arvore_navegacao]: NavegarParaPose: RUNNING  (goal (1.44, 1.60) enviado ao Nav2)
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (NAVEGANDO)
+   [INFO] [arvore_navegacao]: NavegarParaPose: SUCCESS  (o Nav2 chegou ao goal)
+   [INFO] [arvore_navegacao]: --- raiz: SUCCESS ---  (CHEGOU)
+   [INFO] [patrulha]: [3/5] CHEGOU em posto_alvo_3 em 11.6 s (erro 0.153 m, -7.9 graus)
+   [INFO] [patrulha]: posto_alvo_3: DISPARO em 0.7 s (erro final 7.7 px, alvo #75)
+   [INFO] [patrulha]: [4/5] indo para vigia_oeste: (-0.80, 0.80), 180 graus
+   [INFO] [arvore_navegacao]: goal recebido: (-0.80, 0.80) no frame map
+   [INFO] [arvore_navegacao]: NavegarParaPose: RUNNING  (goal (-0.80, 0.80) enviado ao Nav2)
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (NAVEGANDO)
+   [WARN] [obstaculo_surpresa]: robo em (1.07, 1.48) a 0.25 m/s: criando caixa_surpresa em (0.46, 1.46), a 0.55 m do lidar
+   [INFO] [obstaculo_surpresa]: caixa_surpresa criada no Gazebo
+   [WARN] [arvore_navegacao]: CaminhoLivre: FAILURE  (obstaculo a 0.49 m, limite 0.50 m)
+   [WARN] [arvore_navegacao]: NavegarParaPose: interrompido - goal cancelado no Nav2
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (PAUSADO)
+   [INFO] [arvore_navegacao]: InterromperNavegacao: SUCCESS  (robo parado em 0.20 s)
+   [INFO] [arvore_navegacao]: Esperar: RUNNING  (0.0/2.0 s)
+   [INFO] [arvore_navegacao]: Esperar: SUCCESS  (2.0 s parado)
+   [INFO] [arvore_navegacao]: RetomarGoal: SUCCESS  (pausa 1 encerrada)
+   [INFO] [arvore_navegacao]: NavegarParaPose: RUNNING  (goal (-0.80, 0.80) retomado, envio 2)
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (NAVEGANDO)
+   [INFO] [arvore_navegacao]: CaminhoLivre: SUCCESS  (setor livre de novo, 2.08 m)
+   [INFO] [arvore_navegacao]: NavegarParaPose: SUCCESS  (o Nav2 chegou ao goal)
+   [INFO] [arvore_navegacao]: --- raiz: SUCCESS ---  (CHEGOU)
+   [INFO] [patrulha]: [4/5] CHEGOU em vigia_oeste em 17.0 s (erro 0.218 m, 5.0 graus)
+   [INFO] [patrulha]: [5/5] indo para base: (0.00, 0.00), 0 graus
+   [INFO] [arvore_navegacao]: goal recebido: (0.00, 0.00) no frame map
+   [INFO] [arvore_navegacao]: NavegarParaPose: RUNNING  (goal (0.00, 0.00) enviado ao Nav2)
+   [INFO] [arvore_navegacao]: --- raiz: RUNNING ---  (NAVEGANDO)
+   [INFO] [arvore_navegacao]: NavegarParaPose: SUCCESS  (o Nav2 chegou ao goal)
+   [INFO] [arvore_navegacao]: --- raiz: SUCCESS ---  (CHEGOU)
+   [INFO] [patrulha]: [5/5] CHEGOU em base em 10.1 s (erro 0.17 m, 8.0 graus)
+   [INFO] [patrulha]: patrulha concluida: 5/5 postos alcancados, 3/3 disparos, 9.5 m em 80 s
+   [INFO] [launch.user]: [navegacao] patrulha terminou: encerrando o launch
+
+[reproduzir] ===== 2) ros2 bag info ros2_ws/log/tp4/bag_patrulha =====
+   
+   Files:             bag_patrulha_0.db3
+   Bag size:          6.8 MiB
+   Storage id:        sqlite3
+   Duration:          84.237761350s
+   Start:             Nov 23 2026 07:58:34.724516584 (1795431514.724516584)
+   End:               Nov 23 2026 07:59:58.962277934 (1795431598.962277934)
+   Messages:          10668
+   Topic information: Topic: /tf | Type: tf2_msgs/msg/TFMessage | Count: 4099 | Serialization Format: cdr
+                      Topic: /arvore/distancia_frontal | Type: std_msgs/msg/Float32 | Count: 831 | Serialization Format: cdr
+                      Topic: /arma/disparo | Type: projeto_bloco_interfaces/msg/DeteccaoObj | Count: 3 | Serialization Format: cdr
+                      Topic: /map | Type: nav_msgs/msg/OccupancyGrid | Count: 1 | Serialization Format: cdr
+                      Topic: /patrulha/status | Type: std_msgs/msg/String | Count: 14 | Serialization Format: cdr
+                      Topic: /tf_static | Type: tf2_msgs/msg/TFMessage | Count: 1 | Serialization Format: cdr
+                      Topic: /arvore/estado | Type: std_msgs/msg/String | Count: 829 | Serialization Format: cdr
+                      Topic: /obstaculo_surpresa/status | Type: std_msgs/msg/String | Count: 1 | Serialization Format: cdr
+                      Topic: /cmd_vel | Type: geometry_msgs/msg/Twist | Count: 1444 | Serialization Format: cdr
+                      Topic: /amcl_pose | Type: geometry_msgs/msg/PoseWithCovarianceStamped | Count: 168 | Serialization Format: cdr
+                      Topic: /odom | Type: nav_msgs/msg/Odometry | Count: 2440 | Serialization Format: cdr
+                      Topic: /patrulha/rota | Type: nav_msgs/msg/Path | Count: 1 | Serialization Format: cdr
+                      Topic: /scan | Type: sensor_msgs/msg/LaserScan | Count: 830 | Serialization Format: cdr
+                      Topic: /plan | Type: nav_msgs/msg/Path | Count: 6 | Serialization Format: cdr
+   
+
+[reproduzir] ===== 3) reprodução offline (ros2 bag play a 2.0x, sem Gazebo nem Nav2) + analise_bag =====
+   Validacao offline da sessao de navegacao (dados do ros2 bag play)
+     duracao 82.9 s | percorrido 9.45 m | velocidade maxima 0.252 m/s
+     mensagens: {'scan': 830, 'odom': 2440, 'cmd_vel': 1444, 'amcl_pose': 168, 'arvore_estado': 829, 'patrulha_status': 14}
+     patrulha: 5 postos alcancados, 0 falhos, 3 disparos | fim postos=5/5 disparos=3/3 percorrido_m=9.45 duracao_s=80.2
+     AMCL x pose real (/odom do Gazebo): erro medio 0.063 m, maximo 0.099 m em 167 amostras
+     obstaculos a menos de 0.5 m no setor frontal de 60 graus: 1
+       1. t=56.35 s  distancia 0.494 m  arvore NAVEGANDO  parou em 0.19 s  ficou parado 2.14 s (PAUSADO 2.21 s)  em (1.011, 1.469)  -> OK
+     [OK] toda deteccao a menos de 0.5 m parou o robo em ate 1.5 s por pelo menos 2.0 s (minimo de 1 pausa)
+     [OK] /arvore/estado ficou PAUSADO nesses intervalos
+     [OK] todos os postos da patrulha alcancados
+     RESULTADO: APROVADO
+[reproduzir] saídas em ros2_ws/log/tp4:
+   analise_bag.log
+   bag_patrulha
+   bag_play.log
+   patrulha.csv
+   pausa_obstaculo.png
+   reproduzir.log
+   trajetoria.png
+   validacao.json
+   validacao.txt
+
+[reproduzir] para navegar à mão (outro terminal: source ros2_ws/ambiente.sh):
+   ros2 launch projeto_bloco navegacao.launch.py patrulhar:=false surpresa:=false   # e use 2D Goal Pose no RViz
+   ros2 run projeto_bloco patrulha --ros-args --params-file ros2_ws/src/projeto_bloco/config/params.yaml -p use_sim_time:=true
+[reproduzir] concluído
+codigo de saida: 0

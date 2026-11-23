@@ -45,7 +45,8 @@ def pythonpath_com_venv():
     pasta = get_package_prefix('projeto_bloco')
     for _ in range(3):
         pasta = os.path.dirname(pasta)
-        for site in sorted(glob.glob(os.path.join(pasta, '.venv', 'lib', 'python3*', 'site-packages'))):
+        for site in sorted(glob.glob(os.path.join(pasta, '.venv', 'lib', 'python3*',
+                                                  'site-packages'))):
             if site not in atual.split(os.pathsep):
                 return site + (os.pathsep + atual if atual else '')
             return atual

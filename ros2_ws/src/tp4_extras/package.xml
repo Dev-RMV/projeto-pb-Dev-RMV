@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>tp4_extras</name>
+  <version>4.0.0</version>
+  <description>TP4, percepcao veicular no MetaDrive: deteccao de faixas (HSV, Canny, Hough), deteccao de formas em placas (Hough Circle, Harris Corner), coleta de frames rotulados e CNN (Keras) de estados da via</description>
+  <maintainer email="rmv@todo.todo">rmv</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>python3-numpy</exec_depend>
+  <!-- metadrive-simulator, tensorflow, opencv-python e matplotlib: pip no venv ros2_ws/.venv_tp4
+       (requirements_tp4_extras.txt, criado pelo scripts/setup.sh); nao ha pacote rosdep -->
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

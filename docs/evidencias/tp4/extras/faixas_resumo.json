@@ -1,0 +1,118 @@
+{
+  "mapa": "SCSCS",
+  "semente": 0,
+  "trafego": 0.08,
+  "resolucao": [
+    640,
+    360
+  ],
+  "passos": 600,
+  "cada": 2,
+  "frames_processados": 300,
+  "frames_dentro_de_cruzamento": 0,
+  "frames_na_via": 300,
+  "na_via_com_alguma_linha": 300,
+  "na_via_com_as_duas_linhas_da_faixa": 260,
+  "taxa_alguma_linha": 1.0,
+  "taxa_faixa_do_veiculo": 0.8667,
+  "faixa_do_veiculo_por_bloco": {
+    "C": {
+      "frames": 164,
+      "com_faixa": 131,
+      "taxa": 0.7988
+    },
+    "I": {
+      "frames": 35,
+      "com_faixa": 35,
+      "taxa": 1.0
+    },
+    "S": {
+      "frames": 101,
+      "com_faixa": 94,
+      "taxa": 0.9307
+    }
+  },
+  "linhas_por_frame": 6.22,
+  "segmentos_hough_por_frame": 70.6,
+  "ms_por_frame": 2.64,
+  "erro_px_borda_esquerda": {
+    "n": 606,
+    "mediana": 1.74,
+    "media": 13.93,
+    "p90": 75.35
+  },
+  "erro_px_borda_direita": {
+    "n": 549,
+    "mediana": 1.27,
+    "media": 8.74,
+    "p90": 15.19
+  },
+  "parametros": {
+    "branco": [
+      [
+        0,
+        0,
+        185
+      ],
+      [
+        179,
+        60,
+        255
+      ]
+    ],
+    "amarelo": [
+      [
+        18,
+        150,
+        150
+      ],
+      [
+        36,
+        255,
+        255
+      ]
+    ],
+    "roi": [
+      [
+        0.0,
+        1.0
+      ],
+      [
+        0.0,
+        0.64
+      ],
+      [
+        0.38,
+        0.47
+      ],
+      [
+        0.62,
+        0.47
+      ],
+      [
+        1.0,
+        0.64
+      ],
+      [
+        1.0,
+        1.0
+      ]
+    ],
+    "canny": [
+      50,
+      150
+    ],
+    "hough": {
+      "rho": 1.0,
+      "theta_graus": 1.0,
+      "limiar": 15,
+      "comprimento_min": 12,
+      "lacuna_max": 20
+    },
+    "inclinacao_min": 0.2,
+    "zona_proxima": 0.58,
+    "linha_ref": 0.8,
+    "tolerancia": 0.05,
+    "comprimento_grupo": 30
+  }
+}

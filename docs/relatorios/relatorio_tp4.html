@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Relatório TP4 — Navegação autônoma com Nav2, behavior tree, ROS 2 bag e percepção veicular no MetaDrive</title>
+<style>
+  @page { size: A4; margin: 13mm 16mm 13mm 16mm; }
+  :root { --azul: #1f5aa6; --cinza: #f2f3f5; --borda: #c9ccd1; --texto: #1d1f23; }
+  body { font-family: "Segoe UI", "Noto Sans", Arial, sans-serif; font-size: 9.8pt; line-height: 1.36;
+         color: var(--texto); background: #fff; margin: 0; }
+  h1 { font-size: 18pt; margin: 0 0 2px 0; }
+  .sub { color: #5a5f66; font-size: 9.6pt; margin-bottom: 10px; }
+  .ident { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 18px; font-size: 9.8pt; margin-bottom: 12px; }
+  h2 { color: var(--azul); font-size: 12.5pt; margin: 13px 0 6px 0; padding-bottom: 3px;
+       border-bottom: 2px solid var(--azul); break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 8px 0 4px 0; break-after: avoid; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.2pt; margin: 4px 0 6px 0; }
+  th, td { border: 1px solid var(--borda); padding: 4px 7px; vertical-align: top; text-align: left; }
+  th { background: #e9ebee; font-weight: 600; }
+  tr { break-inside: avoid; }
+  table.req td:first-child { width: 36%; }
+  table.res td:first-child { width: 26%; }
+  table.num td, table.num th { text-align: right; }
+  table.num td:first-child, table.num th:first-child { text-align: left; }
+  code { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.7pt; background: var(--cinza);
+         border: 1px solid #e1e3e6; border-radius: 3px; padding: 0 3px; }
+  pre { font-family: Consolas, "Cascadia Mono", monospace; font-size: 8.3pt; background: var(--cinza);
+        border: 1px solid #dfe1e4; border-radius: 4px; padding: 7px 9px; margin: 5px 0 8px 0;
+        white-space: pre-wrap; break-inside: avoid; }
+  ul { margin: 4px 0 6px 0; padding-left: 18px; }
+  li { margin: 2px 0; }
+  figure { margin: 6px 0 8px 0; break-inside: avoid; text-align: center; }
+  figure img { width: 92%; border: 1px solid var(--borda); }
+  figure.larga img { width: 100%; }
+  figure.media img { width: 70%; }
+  .duas { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: start; }
+  .duas img { width: 100%; border: 1px solid var(--borda); }
+  .tres { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; align-items: start; }
+  .tres img { width: 100%; border: 1px solid var(--borda); }
+  figcaption { font-size: 8.8pt; color: #4a4f56; margin-top: 3px; text-align: left; }
+  a { color: var(--azul); }
+</style>
+</head>
+<body>
+
+<h1>Relatório — TP4: navegação autônoma com Nav2, behavior tree, ROS 2 bag e percepção veicular no MetaDrive</h1>
+<div class="sub">PB Sistemas Robóticos 2026.2 · turma GRPEDCR3C1-M1-P1 · entrega <code>entrega-tp4</code> / tag <code>tp4</code> · 23/11/2026</div>
+<div class="ident">
+  <div><b>Aluno:</b> Rodrigo das Mercês Vianna</div>
+  <div><b>GitHub:</b> Dev-RMV (<code>projeto-pb-Dev-RMV</code>)</div>
+  <div><b>Ambiente:</b> Ubuntu 22.04 (WSL2) · ROS 2 Humble · Gazebo Classic 11 · Nav2 1.1.20 · Python 3.10 · MetaDrive 0.4.3 · TensorFlow 2.21 (Keras 3.12) · OpenCV</div>
+  <div><b>Vídeo da demo:</b> link em <code>ARTEFATOS.md</code> e no README (marcador <code>PB:VIDEO-TP4</code>)</div>
+</div>
+
+<h2>1. Objetivo e projeto</h2>
+<p>O <b>Robô Sniper</b> é um robô de esteiras que navega com lidar, detecta alvos de tiro com a câmera e “atira” um feixe de luz na mosca do alvo (proposta em <code>PROJETO.md</code>). Até o TP3 ele tinha a percepção (detector e segmentação treinados para o alvo), a action que mira a torre e dispara, o URDF no Gazebo e o mapa da sala feito com SLAM. O objetivo deste TP é fazê-lo andar sozinho: navegar com o Nav2 sobre esse mapa, patrulhar os postos de tiro desviando do que não está no mapa, parar e retomar o caminho por decisão de uma behavior tree, e provar o comportamento com a sessão gravada em bag. O TP pede também percepção veicular no MetaDrive e uma CNN de estados da via, entregues à parte do robô.</p>
+
+<h2>2. Desenvolvimento por tarefa</h2>
+<table class="req">
+  <tr><th>Requisito</th><th>Entrega</th></tr>
+  <tr><td>Navegação autônoma com Nav2 no Gazebo: costmaps local e global, localização AMCL e planejador de trajetória; nó Python que envia goals de pose sequenciais numa rota de patrulha relevante ao projeto; rota completa com desvio reativo de obstáculos.</td>
+      <td><code>projeto_bloco/launch/navegacao.launch.py</code> sobe com um comando o Gazebo (mundo <code>sala_patrulha.world</code>), o URDF e o Nav2 com <code>config/nav2.yaml</code>: <code>map_server</code> com o mapa do TP3, AMCL, costmaps global e local alimentados pelo lidar, planejador NavFn e controlador Rotation Shim + DWB. O nó <code>patrulha</code> envia goals <code>NavigateToPose</code> em sequência por cinco postos; três são <b>postos de tiro</b>, onde o robô para de frente para um alvo e o engaja com a action do TP2. Um caixote que <b>não está no mapa</b> fica no primeiro trecho: o Nav2 só sabe dele pelo lidar e o contorna. Medido: 5 de 5 postos, 3 de 3 disparos, 9,45 m em 80 s.</td></tr>
+  <tr><td>Lógica de decisão e ROS 2 bag: behavior tree que interrompe a navegação com obstáculo a menos de 0,5 m, aguarda 2 s e retoma o goal; sessão inteira gravada com <code>ros2 bag record</code> e reproduzida offline para validar o comportamento; gráfico da trajetória.</td>
+      <td>Nó <code>arvore_navegacao</code>: behavior tree em Python puro (padrão tick/status, <code>Sequence</code> e <code>Fallback</code>), entre a patrulha e o Nav2. Com o lidar a menos de 0,5 m no setor frontal ela cancela o goal, espera 2 s com o robô parado e reenvia o mesmo goal. O nó <code>obstaculo_surpresa</code> faz uma caixa aparecer na frente do robô para a pausa acontecer sempre no mesmo trecho. O launch grava a sessão (<code>bag:=</code>); o nó <code>analise_bag</code> ouve o <code>ros2 bag play</code>, sem Gazebo nem Nav2, valida a pausa pelos dados brutos e gera o gráfico da trajetória. Medido no bag: obstáculo a 0,494 m, robô parado em 0,19 s, 2,14 s parado, goal retomado e alcançado.</td></tr>
+  <tr><td>Percepção veicular no MetaDrive: detecção de faixas com (a) conversão para HSV e máscara de cor, (b) Canny e (c) Hough Transform, com as faixas sobrepostas ao frame da câmera sintética; detecção de formas geométricas (sinais de trânsito) com Hough Circle e Harris Corner.</td>
+      <td><code>tp4_extras/deteccao_faixas.py</code> (<code>detectar_faixas</code>): máscara HSV de branco e amarelo dentro do trapézio da pista, Canny, <code>HoughLinesP</code>, segmentos agrupados em linhas e as duas linhas da faixa do veículo pintadas sobre o frame. Em 300 frames: alguma linha em 100%, as duas linhas da faixa do veículo em 86,7% (93% nas retas, 80% nas curvas), erro mediano de 1,3 a 1,7 px contra a geometria real da pista, 2,6 ms por frame. <code>deteccao_formas.py</code> (<code>detectar_formas</code>): o MetaDrive não tem placas, então 14 placas (circular, octogonal, triangular e losango) são postas na cena e saem na câmera em perspectiva. A região da placa vem da cor; Hough Circle acha a circular e Harris conta os cantos das outras. Forma certa em 92,6% de 297 aparições, com 1 falso positivo em 250 frames.</td></tr>
+  <tr><td>CNN para classificação de estados da via: 500 frames rotulados do MetaDrive em 3 classes (via livre / obstáculo / cruzamento); CNN em TensorFlow/Keras com data augmentation (rotação ±15°, zoom 0,2, flip horizontal), BatchNormalization e Dropout(0,5); curvas de accuracy e loss com e sem augmentation e relato da melhoria de generalização.</td>
+      <td><code>coletar_dataset.py</code>: 500 frames (167 / 167 / 166), rotulados pelo estado do simulador, em treino (350), validação (75) e teste (75) com mapas diferentes. <code>treinar_cnn.py</code>: 4 blocos Conv + BatchNormalization, Dense(128), Dropout(0,5) e softmax; treina as duas variantes com os mesmos pesos iniciais, plota as curvas e grava o resumo; usa a GPU se o TensorFlow a encontrar e a CPU caso contrário. Com augmentation a accuracy no teste foi de 0,827 para 0,880, no teste com imagens giradas e ampliadas de 0,640 para 0,827, e a distância entre treino e teste caiu de 17 para 2 pontos.</td></tr>
+</table>
+<p>Os dois primeiros itens fazem parte do robô e estão no pacote <code>projeto_bloco</code>. Os dois últimos tratam de percepção de veículos de passeio, que não é o caso do Robô Sniper; ficaram num pacote à parte, <code>tp4_extras</code>, que compartilha o workspace mas não usa nós nem tópicos do ROS 2.</p>
+
+<h2>3. Arquitetura ROS 2 e funcionamento</h2>
+<h3>Navegação e patrulha</h3>
+<pre>navegacao.launch.py  (parâmetros: config/params.yaml + config/navegacao.yaml + config/nav2.yaml)
+ 1. gzserver/gzclient (sala_patrulha.world) + robot_state_publisher (URDF)      2. spawn do robô na origem
+ 3. Nav2 (nav2_bringup/bringup_launch.py):
+      map_server (maps/sala_alvos.yaml) -> /map       amcl: /scan + /map -> TF map->odom, /amcl_pose
+      planner_server (NavFn + costmap global)   controller_server (Rotation Shim + DWB + costmap local)
+      behavior_server, bt_navigator (action /navigate_to_pose), velocity_smoother -> /cmd_vel
+    patrulha --goal NavigateToPose--> arvore_navegacao (/navegar_com_pausa) --goal--> /navigate_to_pose
+       |  em cada posto de tiro: goal /engajar_alvo (TP2)         ^ /scan: obstáculo a menos de 0,5 m
+       v                                                          |   -> cancela, espera 2 s, reenvia
+    servidor_engajar <- rastreador_yolo <- câmera do Gazebo       obstaculo_surpresa -> /spawn_entity
+ 4. ros2 bag record (bag:=pasta) grava a sessão      5. encerrar:=true fecha tudo ao fim da patrulha</pre>
+<ul>
+  <li><b>Mapa e localização:</b> o mapa estático é o que o SLAM Toolbox salvou no TP3 (119 × 119 células de 5 cm). O AMCL parte da pose inicial conhecida (o robô nasce na origem do mapa) e usa o modelo de movimento omnidirecional, porque a esteira escorrega de lado ao girar (seção 6).</li>
+  <li><b>Costmaps:</b> o global soma o mapa estático, a camada de obstáculos do lidar e a inflação (0,40 m); o local é uma janela de 3 × 3 m que anda com o robô, só com o lidar. É a camada de obstáculos que faz o caixote e a caixa surpresa, ausentes do mapa, entrarem no planejamento.</li>
+  <li><b>Planejador e controlador:</b> NavFn (Dijkstra) traça o caminho no costmap global. O Rotation Shim gira o robô no lugar até alinhar com o caminho, e o DWB segue o caminho amostrando velocidades e descartando as que batem no costmap local.</li>
+  <li><b>Patrulha:</b> a rota é uma lista de postos em <code>config/params.yaml</code> (<code>x</code>, <code>y</code>, <code>yaw_graus</code>, <code>engajar</code>). O nó espera o Nav2 ativo e o AMCL localizado, envia um goal por vez, repete o goal abortado e registra cada trecho em CSV. A action de destino é um parâmetro: a árvore (<code>navegar_com_pausa</code>) ou o Nav2 direto (<code>navigate_to_pose</code>).</li>
+</ul>
+
+<h3>Behavior tree</h3>
+<pre>Sequence "Raiz"                          (tick a cada 0,1 s, no relógio do Gazebo)
+  Fallback "CaminhoSeguro"
+    CaminhoLivre               Condition  /scan, setor frontal de 60°, distância >= 0,5 m
+    Sequence "PausaPorObstaculo"
+      InterromperNavegacao     Action     cancela o goal no Nav2 e espera a odometria zerar
+      Esperar                  Action     RUNNING até completar 2 s
+      RetomarGoal              Action     libera a retomada
+  NavegarParaPose              Action     mantém o goal NavigateToPose no Nav2; RUNNING até chegar</pre>
+<p>Com o caminho livre, o <code>Fallback</code> responde SUCCESS já no primeiro filho e a raiz tica o <code>NavegarParaPose</code>. Quando a condição falha, o <code>Fallback</code> desce para a pausa: o goal é cancelado (o “halt” da ação), o robô fica 2 s parado e só então a raiz volta a ticar o <code>NavegarParaPose</code>, que reenvia o mesmo goal. Depois da pausa, o obstáculo que a causou fica marcado como tratado e só gera outra pausa se sair do setor e voltar (histerese de 0,1 m); sem isso um obstáculo fixo prenderia o robô num ciclo de parar e esperar, e ele nunca o contornaria. A árvore é separada da árvore interna do Nav2 (o XML do <code>bt_navigator</code>, que cuida de planejar, seguir e recuperar): uma condição nova lá exigiria um plugin em C++, e em Python a decisão do projeto fica legível e testável. Ela publica <code>/arvore/estado</code> (OCIOSO, NAVEGANDO, PAUSADO, CHEGOU, FALHOU) e <code>/arvore/distancia_frontal</code>.</p>
+
+<h3>Gravação e validação offline</h3>
+<p>Com <code>bag:=pasta</code> o launch roda <code>ros2 bag record</code> em 14 tópicos (<code>/scan</code>, <code>/odom</code>, <code>/tf</code>, <code>/tf_static</code>, <code>/cmd_vel</code>, <code>/amcl_pose</code>, <code>/plan</code>, <code>/map</code> e os de estado da árvore, da patrulha, do obstáculo surpresa e do disparo). O <code>analise_bag</code> assina esses tópicos durante o <code>ros2 bag play</code>, refaz sobre o <code>/scan</code> gravado a mesma conta de distância frontal da árvore e confere pelo <code>/odom</code> que cada detecção a menos de 0,5 m parou o robô em até 1,5 s por pelo menos 2 s. O estado publicado pela árvore entra só como conferência cruzada: se ela dissesse PAUSADO sem o robô parar, a análise reprovaria.</p>
+
+<h3>Percepção veicular no MetaDrive (pacote <code>tp4_extras</code>)</h3>
+<ul>
+  <li><b>Faixas:</b> o frame da câmera sintética (640 × 360) vai para HSV; duas faixas de cor isolam o branco e o amarelo das marcações, só dentro de um trapézio que cobre a pista. O Canny tira as bordas da máscara e o <code>HoughLinesP</code> devolve segmentos. Os segmentos são agrupados em linhas pela posição em que cruzam uma altura de referência; a linha mais próxima à esquerda e à direita do centro delimita a faixa do veículo, que é pintada sobre o frame.</li>
+  <li><b>Formas:</b> as placas são polígonos texturizados do panda3d postos na beira da pista. Rodar Hough Circle e Harris no frame inteiro dispara em rodas, asfalto e letras; por isso a cor (vermelho e amarelo) recorta primeiro a região de cada placa. Na silhueta recortada, o Hough Circle confirma a placa circular e o Harris conta os cantos: 3 = triangular, 4 = losango, 5 a 9 = octogonal.</li>
+  <li><b>Dataset:</b> um piloto automático do simulador dirige em mapas sorteados e cada frame recebe o rótulo do estado do simulador, não da imagem: <code>obstaculo</code> se há veículo, cone ou barreira na faixa do carro a até 20 m; <code>cruzamento</code> se o carro está a até 18 m da entrada de um cruzamento ou dentro dele; <code>via_livre</code> se não há nada na faixa em 40 m. Os casos de fronteira são descartados. Como o piloto do simulador freia ou troca de faixa antes de chegar perto de um obstáculo, a classe <code>obstaculo</code> quase não aparecia sozinha: em 159 dos 167 frames dessa classe o obstáculo (cones, triângulo, barreira ou carro parado) é posto na faixa só para a foto e retirado em seguida. Treino, validação e teste usam sementes diferentes, isto é, pistas diferentes.</li>
+  <li><b>CNN:</b> entrada de 90 × 160; 4 blocos Conv2D 3×3 → BatchNormalization → ReLU → MaxPooling (32, 64, 128 e 128 filtros), Dense(128), Dropout(0,5) e Dense(3, softmax); 1,06 milhão de parâmetros, Adam com taxa 3·10⁻⁴, lote de 32, 60 épocas. A augmentation (rotação ±15°, zoom 0,2, flip horizontal) fica dentro do modelo e só age no treino. As métricas são as da época de maior accuracy de validação.</li>
+</ul>
+<p>As dependências (MetaDrive, TensorFlow) ficam num venv próprio, <code>ros2_ws/.venv_tp4</code>, separado do venv do YOLO: o TensorFlow e o MetaDrive pedem numpy 2, e o <code>cv_bridge</code> do Humble exige numpy 1.x.</p>
+
+<h2>4. Como executar</h2>
+<pre>git clone https://github.com/Dev-RMV/projeto-pb-Dev-RMV.git && cd projeto-pb-Dev-RMV
+./scripts/reproduzir.sh     # instala o que faltar, compila, roda a patrulha gravando o bag, mostra o
+                            # ros2 bag info, valida o bag offline e chama os itens do MetaDrive e da CNN</pre>
+<p>Saídas da navegação em <code>ros2_ws/log/tp4/</code> (bag, <code>patrulha.csv</code>, <code>trajetoria.png</code>, <code>pausa_obstaculo.png</code>, <code>validacao.txt</code>). <code>SEM_EXTRAS=1</code> roda só a navegação. À mão, cada terminal com <code>source ros2_ws/ambiente.sh</code>: <code>ros2 launch projeto_bloco navegacao.launch.py</code> (<code>arvore:=false surpresa:=false</code> para só Nav2 e patrulha; <code>patrulhar:=false</code> para mandar goals pelo botão <i>2D Goal Pose</i> do RViz; <code>voltas:=2</code>) · <code>ros2 launch projeto_bloco navegacao.launch.py bag:=$HOME/bag encerrar:=true</code> · <code>ros2 bag info $HOME/bag</code> · <code>ros2 run projeto_bloco analise_bag --ros-args -p pasta:=$HOME/analise</code> e, em outro terminal, <code>ros2 bag play $HOME/bag --clock</code>. Os itens do MetaDrive rodam sozinhos com <code>./scripts/reproduzir_tp4_extras.sh</code> (etapas <code>faixas</code>, <code>formas</code>, <code>dataset</code>, <code>cnn</code>; <code>DISPOSITIVO=cpu</code> força a CPU), com as saídas em <code>ros2_ws/log/tp4_extras/</code>. As demos do TP3 e do TP2 continuam em <code>./scripts/reproduzir_tp3.sh</code> e <code>./scripts/reproduzir_tp2.sh</code>.</p>
+
+<h2>5. Resultados e evidências</h2>
+<h3>Patrulha com Nav2 (uma execução de <code>./scripts/reproduzir.sh</code> num clone limpo)</h3>
+<table class="num">
+  <tr><th>Posto (goal)</th><th>Trecho (s)</th><th>Erro de posição (m)</th><th>Erro de orientação (°)</th><th>Disparo</th></tr>
+  <tr><td>posto_alvo_2 (contornando o caixote fora do mapa)</td><td>14,8</td><td>0,211</td><td>8,6</td><td>em 1,1 s, erro de 2,0 px</td></tr>
+  <tr><td>posto_alvo_1</td><td>14,1</td><td>0,255</td><td>−8,6</td><td>em 0,5 s, erro de 8,9 px</td></tr>
+  <tr><td>posto_alvo_3</td><td>11,6</td><td>0,153</td><td>−7,9</td><td>em 0,7 s, erro de 7,7 px</td></tr>
+  <tr><td>vigia_oeste (com a pausa de 2 s e o contorno da caixa surpresa)</td><td>17,0</td><td>0,218</td><td>5,0</td><td>—</td></tr>
+  <tr><td>base</td><td>10,1</td><td>0,170</td><td>8,0</td><td>—</td></tr>
+</table>
+<p>Total: 5 de 5 postos, 3 de 3 disparos, 9,45 m em 80 s de simulação, velocidade máxima de 0,25 m/s e nenhuma recuperação do Nav2. O erro do AMCL em relação à pose real do robô no Gazebo foi de 6,3 cm em média e 9,9 cm no máximo (167 amostras). O erro de chegada vem de duas parcelas: o DWB para de andar a 0,12 m do ponto, e a esteira ainda desloca o centro do robô ao girar no lugar para a orientação final. Em outra execução, com duas voltas, foram 10 de 10 postos e 6 de 6 disparos; na segunda volta a caixa surpresa já estava no costmap e o robô só desviou, sem pausa.</p>
+<figure class="larga">
+  <div class="duas" style="width:86%;margin:0 auto">
+    <img src="../evidencias/tp4/trajetoria.png" alt="Gráfico da trajetória gerado do bag">
+    <div>
+      <img src="../evidencias/tp4/rviz_1_desvio_caixote.jpg" alt="RViz: plano contornando o caixote fora do mapa">
+      <img src="../evidencias/tp4/gazebo_2_pausa_caixa_surpresa.jpg" alt="Gazebo: robô parado diante da caixa surpresa" style="margin-top:6px">
+    </div>
+  </div>
+  <figcaption>À esquerda, o <b>gráfico da trajetória</b> gerado pelo <code>analise_bag</code> a partir do bag: pose real e estimativa do AMCL sobre o mapa, os cinco postos (1 a 5), a pausa da behavior tree (X), a caixa surpresa e o caixote que não está no mapa. À direita, em cima, o RViz no primeiro trecho: costmaps global e local, o plano do Nav2 (verde) contornando o caixote que só o lidar vê, a rota da patrulha (roxo) e as partículas do AMCL; embaixo, o Gazebo durante a pausa, com o robô parado diante da caixa vermelha.</figcaption>
+</figure>
+
+<h3>Pausa por obstáculo, validada no bag</h3>
+<figure class="larga">
+  <img style="width:70%" src="../evidencias/tp4/pausa_obstaculo.png" alt="Distância frontal, velocidade e estado da árvore no tempo">
+  <figcaption>Dados do bag reproduzido offline. Em cima, a distância frontal do lidar; aos 56 s a caixa surpresa aparece e a leitura cruza os 0,5 m. No meio, a velocidade do <code>/odom</code> vai a zero e fica 2,14 s parada (faixa vermelha). Embaixo, o estado publicado pela árvore: NAVEGANDO → PAUSADO → NAVEGANDO, até CHEGOU.</figcaption>
+</figure>
+<pre>Validacao offline da sessao de navegacao (dados do ros2 bag play)
+  duracao 82.9 s | percorrido 9.45 m | velocidade maxima 0.252 m/s
+  patrulha: 5 postos alcancados, 0 falhos, 3 disparos
+  AMCL x pose real (/odom do Gazebo): erro medio 0.063 m, maximo 0.099 m em 167 amostras
+  obstaculos a menos de 0.5 m no setor frontal de 60 graus: 1
+    1. t=56.35 s  distancia 0.494 m  arvore NAVEGANDO  parou em 0.19 s  ficou parado 2.14 s (PAUSADO 2.21 s)  -> OK
+  [OK] toda deteccao a menos de 0.5 m parou o robo em ate 1.5 s por pelo menos 2.0 s (minimo de 1 pausa)
+  [OK] /arvore/estado ficou PAUSADO nesses intervalos
+  [OK] todos os postos da patrulha alcancados
+  RESULTADO: APROVADO</pre>
+<p>O bag da sessão (84 s, 10 668 mensagens, 6,8 MB) está em <code>docs/evidencias/tp4/bag_patrulha/</code>, com a saída do <code>ros2 bag info</code> em <code>bag_info.txt</code>.</p>
+<figure class="larga">
+  <div class="tres">
+    <img src="../evidencias/tp4/disparo_posto_alvo_2.jpg" alt="Disparo no posto do alvo 2">
+    <img src="../evidencias/tp4/disparo_posto_alvo_1.jpg" alt="Disparo no posto do alvo 1">
+    <img src="../evidencias/tp4/disparo_posto_alvo_3.jpg" alt="Disparo no posto do alvo 3">
+  </div>
+  <figcaption><code>/torre/visao</code> no instante do disparo em cada posto de tiro (alvos 2, 1 e 3): a navegação entrega o robô de frente para o alvo e a torre do TP2 trava e dispara em 0,5 a 1,1 s.</figcaption>
+</figure>
+
+<h3>Detecção de faixas no MetaDrive</h3>
+<figure class="larga">
+  <img src="../evidencias/tp4/extras/faixas_etapas.jpg" alt="Etapas da detecção de faixas em três frames">
+  <figcaption>Três frames da câmera sintética, cada um em quatro painéis: câmera; (a) HSV + máscara de cor; (b) Canny; (c) Hough com as faixas sobrepostas (vermelho: segmentos do Hough; ciano: linhas ajustadas; verde: as duas linhas e a área da faixa do veículo).</figcaption>
+</figure>
+<p>Em 300 frames do mapa de teste (retas e curvas), o pipeline achou alguma linha em todos e as duas linhas da faixa do veículo em 260 (86,7%): 94 de 101 nas retas e 131 de 164 nas curvas. O erro contra a borda real da faixa no simulador, projetada na imagem, tem mediana de 1,7 px à esquerda e 1,3 px à direita; o percentil 90 sobe a 75 px à esquerda por causa das curvas fechadas, onde uma reta do Hough não acompanha a pista. Custo: 2,6 ms por frame.</p>
+
+<h3>Detecção de formas (placas)</h3>
+<figure class="larga">
+  <img src="../evidencias/tp4/extras/formas_etapas.jpg" alt="Etapas da detecção de formas em três frames">
+  <figcaption>Câmera; Hough Circle no frame inteiro (dispara também no asfalto e nas rodas); Harris no frame inteiro (cantos no carro e nas letras); e o resultado, com a região da placa recortada pela cor e a forma classificada por Hough Circle e Harris.</figcaption>
+</figure>
+<table class="num">
+  <tr><th>Forma</th><th>Aparições (raio ≥ 10 px)</th><th>Forma certa</th><th>Taxa</th></tr>
+  <tr><td>circular (Hough Circle)</td><td>87</td><td>76</td><td>87,4%</td></tr>
+  <tr><td>triangular (3 cantos no Harris)</td><td>80</td><td>76</td><td>95,0%</td></tr>
+  <tr><td>losango (4 cantos)</td><td>65</td><td>62</td><td>95,4%</td></tr>
+  <tr><td>octogonal (5 a 9 cantos)</td><td>65</td><td>61</td><td>93,8%</td></tr>
+  <tr><td><b>total</b></td><td><b>297</b></td><td><b>275</b></td><td><b>92,6%</b></td></tr>
+</table>
+<p>Os erros estão todos nas placas pequenas: com raio aparente de 10 a 15 px a taxa é de 81,5% (97 de 119) e, a partir de 15 px, de 100% (178 de 178). Houve 1 falso positivo em 250 frames.</p>
+
+<h3>CNN de estados da via: relatório dos experimentos</h3>
+<figure class="larga">
+  <img src="../evidencias/tp4/extras/dataset_amostras.jpg" alt="Amostras do dataset por classe">
+  <figcaption>Oito amostras de treino por classe: <code>via_livre</code>, <code>obstaculo</code> e <code>cruzamento</code>. São 500 frames de 320 × 180, 167 / 167 / 166 por classe; treino com 350 frames de 26 mapas, validação com 75 de 9 mapas e teste com 75 de 7 mapas, sem mapa repetido entre as partições.</figcaption>
+</figure>
+<figure class="larga">
+  <img src="../evidencias/tp4/extras/cnn_curvas.png" alt="Curvas de accuracy e loss com e sem augmentation">
+  <figcaption>Accuracy (em cima) e loss (embaixo) de treino e validação, sem augmentation (esquerda) e com augmentation (centro), e as duas validações lado a lado (direita). Treino na GPU, 60 épocas.</figcaption>
+</figure>
+<table class="num">
+  <tr><th>Treino em</th><th style="text-align:left">Variante</th><th>Treino</th><th>Validação</th><th>Teste</th><th>Teste perturbado</th><th>Treino − teste</th><th>Loss no teste</th><th>Tempo</th></tr>
+  <tr><td>GPU</td><td style="text-align:left">sem augmentation</td><td>1,000</td><td>0,973</td><td>0,827</td><td>0,640</td><td>+0,173</td><td>0,564</td><td>27 s</td></tr>
+  <tr><td>GPU</td><td style="text-align:left">com augmentation</td><td>0,897</td><td>0,973</td><td>0,880</td><td>0,827</td><td>+0,017</td><td>1,018</td><td>30 s</td></tr>
+  <tr><td>CPU</td><td style="text-align:left">sem augmentation</td><td>0,986</td><td>0,987</td><td>0,813</td><td>0,667</td><td>+0,172</td><td>0,600</td><td>114 s</td></tr>
+  <tr><td>CPU</td><td style="text-align:left">com augmentation</td><td>0,886</td><td>0,987</td><td>0,867</td><td>0,787</td><td>+0,019</td><td>0,728</td><td>83 s</td></tr>
+</table>
+<p>O teste perturbado são os 75 frames de teste com rotação de ±15°, zoom de 0,2 e flip sorteados uma vez. O que a comparação mostrou:</p>
+<ul>
+  <li><b>Menos memorização:</b> sem augmentation a rede chega a 99–100% no treino e fica 17 pontos acima do teste. Com augmentation o treino fica em 89–90% e a diferença para o teste cai para 2 pontos.</li>
+  <li><b>Pistas novas:</b> a accuracy no teste subiu 5,3 pontos nas duas rodadas (62 → 66 e 61 → 65 acertos em 75). É um ganho pequeno para 75 frames, em que cada frame vale 1,3 ponto: em outras três rodadas com os mesmos dados a diferença foi de +4,0, +2,7 e −2,7 pontos.</li>
+  <li><b>Imagens giradas ou ampliadas:</b> é onde a augmentation rende de fato, +18,7 e +12,0 pontos. A rede treinada sem augmentation cai para 64–67% quando a imagem vem perturbada.</li>
+  <li><b>O que piorou:</b> a loss no teste sobe com augmentation mesmo com mais acertos, e a curva de validação oscila, caindo a cerca de 0,5 em algumas épocas. A causa provável, não isolada num experimento próprio, é o BatchNormalization estimar as médias nos lotes aumentados enquanto a validação usa imagens limpas.</li>
+  <li>A validação satura em 97–99% nas duas variantes e não separa uma da outra; por isso a comparação usa o teste. Matriz de confusão no teste (GPU, com augmentation; linhas = classe real, na ordem via livre, obstáculo, cruzamento): [17, 4, 4], [1, 24, 0], [0, 0, 25]. Os erros que restam são vias livres tomadas por obstáculo ou cruzamento.</li>
+</ul>
+
+<h2>6. Problemas e soluções</h2>
+<ul>
+  <li><b>A localização se perdia em todo giro no lugar:</b> no primeiro teste o AMCL acompanhou o robô com 8 cm de erro por 11 s e, ao girar no posto, o desvio padrão das partículas saltou de 0,07 m e 7° para 1,4 m e 110° em 0,2 s. O bag mostrou que a esteira escorrega de lado ao girar (até 6 cm/s); o modelo de movimento diferencial do AMCL supõe que o robô só anda para onde aponta e lê esse passo lateral como “girar 90°, andar, girar de volta”. Trocado pelo modelo omnidirecional (<code>nav2_amcl::OmniMotionModel</code>), o erro ficou em 6 cm, giros incluídos.</li>
+  <li><b><code>Failed to make progress</code> ao chegar:</b> a árvore padrão do Nav2 replaneja a cada 1 s, e cada caminho novo zera o estado do DWB, inclusive a marca de “já cheguei”. Como a esteira desloca o centro do robô em até 10 cm no giro final, ele saía da tolerância e o DWB alternava entre voltar ao ponto e girar para a orientação do goal, em sentidos opostos. Resolvido com a árvore interna que só replaneja quando o caminho fica inválido e com o Rotation Shim. Sobrou um caso raro (uma vez em quatro patrulhas): com a mesma tolerância de posição no DWB e no verificador de chegada, o robô entrava nela no limite, o DWB parava para girar e o verificador não marcava a chegada. A tolerância do DWB ficou em 0,12 m e a do verificador em 0,25 m; depois disso, nenhuma falha em quatro patrulhas seguidas.</li>
+  <li><b>Comunicação DDS no WSL com rede espelhada:</b> no meio dos testes o spawn do robô passou a levar 30 s e o Nav2 a estourar o tempo dos serviços. Um publicador e um assinante mínimos não se achavam em 70 s por UDP e se achavam em 0,01 s por memória compartilhada. O perfil Fast-DDS do projeto ficou só com memória compartilhada. A mesma rede travava a CLI do ROS 2 (a checagem do daemon numa porta local sem servidor expira em vez de ser recusada); o <code>ambiente.sh</code> passou a subir o daemon direto.</li>
+  <li><b>Obstáculo abaixo do lidar:</b> a bola do mundo do TP3 tem 0,24 m e o plano do lidar fica a 0,285 m; o robô trombaria nela sem vê-la. O mundo do TP4 é a mesma sala sem a bola e com o caixote fora do mapa.</li>
+  <li><b>Caixa surpresa perto demais:</b> criada a 0,45 m do lidar, deixava o robô parado a 0,36 m, quase encostado, e ele demorava a manobrar. Passou a aparecer a 0,55 m: o robô anda mais 5 cm, cruza os 0,5 m da árvore e para a 0,49 m, com espaço para girar.</li>
+  <li><b>Postos de tiro recuados:</b> a 1,2 m do alvo o giro final levava o robô para mais perto e a folha saía cortada no topo da imagem. Os postos ficaram a 1,5 m dos alvos 1 e 3 e a 1,3 m do alvo 2, onde um muro limita o recuo.</li>
+  <li><b>MetaDrive sem placas de trânsito:</b> o simulador não traz sinais circulares ou octogonais. As placas foram acrescentadas à cena como polígonos texturizados, para saírem na câmera com perspectiva e tamanho variando com a distância; a arte é gerada pelo OpenCV.</li>
+  <li><b>Hough e Harris no frame inteiro não servem:</b> o Hough Circle dispara em rodas e manchas do asfalto e o Harris em qualquer quina. A cor da placa passou a recortar a região antes, e os dois detectores trabalham só na silhueta.</li>
+  <li><b>Validação da CNN presa em 33%:</b> com 350 frames são só 11 lotes por época, e as médias móveis do BatchNormalization, com o momento padrão do Keras (0,99), não assentavam: o treino chegava a 90% e a validação continuava no acaso por mais de 20 épocas. Com momento 0,9 e taxa de aprendizado 3·10⁻⁴ a validação acompanha o treino.</li>
+  <li><b>GPU não registrada pelo TensorFlow:</b> as bibliotecas CUDA instaladas pelo pip ficam fora do caminho do carregador (<code>Cannot dlopen some GPU libraries</code>). O <code>treinar_cnn</code> põe essas pastas no <code>LD_LIBRARY_PATH</code> e se reexecuta uma vez; sem GPU, ou com <code>--dispositivo cpu</code>, o treino segue na CPU.</li>
+  <li><b>Dois venvs:</b> o TensorFlow e o MetaDrive resolvem numpy 2; o <code>cv_bridge</code> do ROS 2 Humble só funciona com numpy 1.x. Por isso o pacote <code>tp4_extras</code> tem o seu venv e não cria nós do ROS.</li>
+  <li><b>Fora do TP4:</b> o controle da torre no Gazebo (<code>ros2_control</code>), previsto no plano, não foi feito: o enunciado não pede e a torre continua simulada pelo <code>servidor_engajar</code>. O simulador continua o Gazebo Classic 11. Os itens do MetaDrive só foram validados com tela (WSLg); o caminho sem servidor X, com <code>xvfb-run</code>, está no script mas não foi testado. O <code>/odom</code> do plugin das esteiras é a pose real do robô no mundo, não odometria de encoder; por isso o AMCL tem vida fácil na simulação, e no robô real a odometria terá de vir de outra fonte.</li>
+</ul>
+
+<h2>7. Próximos passos</h2>
+<ul>
+  <li><b>Torre no Gazebo:</b> controlar as juntas pan/tilt com <code>ros2_control</code>, para a mira deixar de ser simulada dentro do <code>servidor_engajar</code>. Estava no plano deste TP e ficou registrado em <code>docs/decisoes.md</code>.</li>
+  <li><b>Odometria de verdade:</b> o <code>/odom</code> da simulação é a pose real do robô. Antes do robô físico é preciso navegar com odometria de encoder das esteiras (ou de lidar) e ver se o AMCL aguenta o escorregamento.</li>
+  <li><b>Missão numa árvore só:</b> hoje a patrulha é um nó em sequência e a árvore cuida só da pausa. O passo seguinte é pôr patrulhar, engajar e tratar falhas (goal abortado, alvo não encontrado) na mesma behavior tree.</li>
+  <li><b>Hardware:</b> medir o chassi real, atualizar o URDF e o raio do robô nos costmaps, e rodar a percepção no Arduino UNO Q com o detector leve (<code>params_uno_q.yaml</code>).</li>
+</ul>
+<p>A ordem depende do enunciado do TP5.</p>
+
+<h2>8. Referências</h2>
+<ul>
+  <li>Material da disciplina: repositório <a href="https://github.com/Prof-Dacio-INFNET/PBRoboticos_prof_dacio">PBRoboticos_prof_dacio</a> e os exemplos de aula de Aplicações Robóticas com ROS 2 (padrão da behavior tree em Python).</li>
+  <li>Nav2, documentação e guias de configuração (AMCL, costmaps, NavFn, DWB, Rotation Shim, árvores do <code>bt_navigator</code>): <a href="https://docs.nav2.org/">docs.nav2.org</a>.</li>
+  <li>ROS 2 Humble, documentação (actions, launch, <code>rosbag2</code>, Fast DDS): <a href="https://docs.ros.org/en/humble/">docs.ros.org/en/humble</a>.</li>
+  <li>MetaDrive, documentação do simulador: <a href="https://metadrive-simulator.readthedocs.io/">metadrive-simulator.readthedocs.io</a>.</li>
+  <li>Keras, camadas de augmentation, BatchNormalization e Dropout: <a href="https://keras.io/api/layers/">keras.io/api/layers</a>.</li>
+  <li>OpenCV, Canny, transformada de Hough (linhas e círculos) e Harris: <a href="https://docs.opencv.org/4.x/">docs.opencv.org</a>.</li>
+  <li>Do próprio projeto: <code>docs/decisoes.md</code>, <code>docs/diario.md</code> e os relatórios dos TPs anteriores em <code>docs/relatorios/</code>.</li>
+</ul>
+
+</body>
+</html>

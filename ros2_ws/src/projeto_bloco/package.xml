@@ -2,8 +2,8 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>projeto_bloco</name>
-  <version>3.0.0</version>
-  <description>Robo Sniper: camera, segmentacao HSV, rostos (TP1); rastreamento YOLO + Kalman e action de engajamento (TP2); bringup Gazebo + SLAM Toolbox e segmentacao por instancia (TP3)</description>
+  <version>4.0.0</version>
+  <description>Robo Sniper: camera, segmentacao HSV, rostos (TP1); rastreamento YOLO + Kalman e action de engajamento (TP2); bringup Gazebo + SLAM Toolbox e segmentacao por instancia (TP3); navegacao autonoma com Nav2, patrulha dos postos de tiro, behavior tree e analise de bag (TP4)</description>
   <maintainer email="rmv@todo.todo">rmv</maintainer>
   <license>MIT</license>
 
@@ -12,6 +12,12 @@
   <depend>cv_bridge</depend>
   <depend>rcl_interfaces</depend>
   <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>nav2_msgs</depend>
+  <depend>gazebo_msgs</depend>
+  <depend>tf2_ros</depend>
   <depend>projeto_bloco_interfaces</depend>
   <exec_depend>action_msgs</exec_depend>
   <exec_depend>python3-opencv</exec_depend>
@@ -29,6 +35,12 @@
   <exec_depend>tf2_tools</exec_depend>
   <exec_depend>nav2_map_server</exec_depend>
   <exec_depend>teleop_twist_keyboard</exec_depend>
+  <exec_depend>navigation2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>ros2bag</exec_depend>
+  <exec_depend>rosbag2_storage_default_plugins</exec_depend>
+  <exec_depend>python3-matplotlib</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
   <!-- ultralytics (YOLO) + torch: pip no venv ros2_ws/.venv (scripts/setup.sh), nao ha pacote rosdep -->
 
   <test_depend>ament_copyright</test_depend>

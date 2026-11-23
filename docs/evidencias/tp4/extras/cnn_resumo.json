@@ -1,0 +1,141 @@
+{
+  "dataset": "/home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset",
+  "classes": [
+    "via_livre",
+    "obstaculo",
+    "cruzamento"
+  ],
+  "frames": {
+    "treino": 350,
+    "validacao": 75,
+    "teste": 75
+  },
+  "entrada": [
+    90,
+    160
+  ],
+  "epocas": 60,
+  "lote": 32,
+  "taxa_de_aprendizado": 0.0003,
+  "semente": 42,
+  "semente_do_teste_perturbado": 1042,
+  "dispositivo": "GPU (NVIDIA GeForce RTX 4070 Ti SUPER)",
+  "gpu": true,
+  "tensorflow": "2.21.0",
+  "augmentation": {
+    "rotacao_graus": 15.0,
+    "zoom": 0.2,
+    "flip": "horizontal"
+  },
+  "variantes": {
+    "sem_augmentation": {
+      "melhor_epoca": 26,
+      "tempo_treino_s": 26.9,
+      "parametros": 1061603,
+      "avaliacao_melhor_epoca": {
+        "treino": {
+          "accuracy": 1.0,
+          "loss": 0.024
+        },
+        "validacao": {
+          "accuracy": 0.9733,
+          "loss": 0.0867
+        },
+        "teste": {
+          "accuracy": 0.8267,
+          "loss": 0.5635
+        },
+        "teste_perturbado": {
+          "accuracy": 0.64,
+          "loss": 1.1
+        }
+      },
+      "gap_treino_validacao": 0.0267,
+      "gap_treino_teste": 0.1733,
+      "curvas_media_5_ultimas_epocas": {
+        "accuracy": 0.9937,
+        "val_accuracy": 0.96,
+        "loss": 0.0212,
+        "val_loss": 0.1562
+      },
+      "menor_val_loss": 0.0867,
+      "maior_val_accuracy": 0.9733,
+      "matriz_de_confusao_teste": [
+        [
+          18,
+          3,
+          4
+        ],
+        [
+          6,
+          19,
+          0
+        ],
+        [
+          0,
+          0,
+          25
+        ]
+      ]
+    },
+    "com_augmentation": {
+      "melhor_epoca": 60,
+      "tempo_treino_s": 30.0,
+      "parametros": 1061603,
+      "avaliacao_melhor_epoca": {
+        "treino": {
+          "accuracy": 0.8971,
+          "loss": 0.2419
+        },
+        "validacao": {
+          "accuracy": 0.9733,
+          "loss": 0.1398
+        },
+        "teste": {
+          "accuracy": 0.88,
+          "loss": 1.0185
+        },
+        "teste_perturbado": {
+          "accuracy": 0.8267,
+          "loss": 0.9485
+        }
+      },
+      "gap_treino_validacao": -0.0762,
+      "gap_treino_teste": 0.0171,
+      "curvas_media_5_ultimas_epocas": {
+        "accuracy": 0.8874,
+        "val_accuracy": 0.7867,
+        "loss": 0.2437,
+        "val_loss": 0.5586
+      },
+      "menor_val_loss": 0.1277,
+      "maior_val_accuracy": 0.9733,
+      "matriz_de_confusao_teste": [
+        [
+          17,
+          4,
+          4
+        ],
+        [
+          1,
+          24,
+          0
+        ],
+        [
+          0,
+          0,
+          25
+        ]
+      ]
+    }
+  },
+  "comparacao": {
+    "accuracy_teste": 0.0533,
+    "accuracy_teste_perturbado": 0.1867,
+    "gap_treino_teste": -0.1562,
+    "accuracy_validacao": 0.0,
+    "loss_teste": 0.455,
+    "gap_treino_validacao": -0.1029,
+    "val_loss_fim_do_treino": 0.4024
+  }
+}

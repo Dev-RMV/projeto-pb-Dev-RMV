@@ -22,7 +22,7 @@ entregas:
 
 ## Identificação
 - **Nome:** <!-- PB:ALUNO --> _Rodrigo das Mercês Vianna_
-- **Usuário GitHub:** · **Disciplina:** PB Sistemas Robóticos (GRPEDCR3C1-M1-P1)
+- **Usuário GitHub:** Dev-RMV · **Disciplina:** PB Sistemas Robóticos (GRPEDCR3C1-M1-P1)
 
 ## Sobre o projeto
 _Robô Sniper: O projeto pretende criar um robô que simula um tanque que atira em alvos (estilo os de competições), simulando um cenário de conflito. Para isso, o controle será feito em um grafo ROS2, usando sensores como lidar e câmera, e atuadores como motores e um emissor de luz, que irá acertar a mosca do alvo. Proposta e planejamento completos: [PROJETO.md](PROJETO.md)._
@@ -33,7 +33,12 @@ O professor corrige **executando** num clone limpo — mantenha isto funcionando
 ./scripts/setup.sh        # dependências além do setup padrão da disciplina
 ./scripts/reproduzir.sh   # compila, obtém/gera artefatos e roda a demo do TP corrente
 ```
-Demo atual (TP3): `bringup.launch.py` sobe com um comando o Gazebo Classic 11 (sala com obstáculos e alvos impressos), o URDF, o SLAM Toolbox (mapa + TF `map → odom → base_footprint`), a percepção do TP2, a segmentação por instância dos alvos (`/vision/segmented`), o RViz2 e um piloto que percorre a sala; o script ainda gera a árvore de TF, salva o mapa e engaja um alvo. A demo do TP2 continua em `./scripts/reproduzir_tp2.sh`. Comandos manuais e detalhes: [`ros2_ws/src/projeto_bloco/README.md`](ros2_ws/src/projeto_bloco/README.md).
+Demo atual (TP4), em duas partes:
+
+1. **Navegação autônoma do robô** (`navegacao.launch.py`, um comando): Gazebo Classic 11 com a sala dos alvos, o URDF e o Nav2 sobre o mapa salvo no TP3 (AMCL, costmaps global e local, planejador e controlador). O robô patrulha os postos de tiro com goals de pose em sequência, desvia de um caixote que não está no mapa e engaja o alvo em cada posto. Uma behavior tree em Python interrompe a navegação quando o lidar vê um obstáculo a menos de 0,5 m (uma caixa que aparece na frente do robô), espera 2 s e retoma o goal. A sessão é gravada com `ros2 bag record`; em seguida o script mostra o `ros2 bag info`, reproduz o bag offline e valida a pausa, gerando o gráfico da trajetória em `ros2_ws/log/tp4/`.
+2. **Percepção veicular no MetaDrive** (`./scripts/reproduzir_tp4_extras.sh`, chamado no fim; `SEM_EXTRAS=1` pula): detecção de faixas (HSV, Canny, Hough), detecção de formas (Hough Circle, Harris) e uma CNN de estados da via treinada com e sem data augmentation. Fica no pacote `tp4_extras`, separado do robô.
+
+As demos anteriores continuam em `./scripts/reproduzir_tp3.sh` (bringup com SLAM e segmentação) e `./scripts/reproduzir_tp2.sh`. Comandos manuais e detalhes: [`ros2_ws/src/projeto_bloco/README.md`](ros2_ws/src/projeto_bloco/README.md).
 
 ## Fluxo de branches (leia o [consulta/git.md](consulta/git.md))
 - **`main`** — estado atual e estável do projeto (evolui TP a TP; sempre compilável).

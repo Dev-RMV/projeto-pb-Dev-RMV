@@ -1,0 +1,11 @@
+Validacao offline da sessao de navegacao (dados do ros2 bag play)
+  duracao 82.9 s | percorrido 9.45 m | velocidade maxima 0.252 m/s
+  mensagens: {'scan': 830, 'odom': 2440, 'cmd_vel': 1444, 'amcl_pose': 168, 'arvore_estado': 829, 'patrulha_status': 14}
+  patrulha: 5 postos alcancados, 0 falhos, 3 disparos | fim postos=5/5 disparos=3/3 percorrido_m=9.45 duracao_s=80.2
+  AMCL x pose real (/odom do Gazebo): erro medio 0.063 m, maximo 0.099 m em 167 amostras
+  obstaculos a menos de 0.5 m no setor frontal de 60 graus: 1
+    1. t=56.35 s  distancia 0.494 m  arvore NAVEGANDO  parou em 0.19 s  ficou parado 2.14 s (PAUSADO 2.21 s)  em (1.011, 1.469)  -> OK
+  [OK] toda deteccao a menos de 0.5 m parou o robo em ate 1.5 s por pelo menos 2.0 s (minimo de 1 pausa)
+  [OK] /arvore/estado ficou PAUSADO nesses intervalos
+  [OK] todos os postos da patrulha alcancados
+  RESULTADO: APROVADO

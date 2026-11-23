@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-  Perfil Fast-DDS (rmw_fastrtps_cpp, padrao do ROS 2 Humble) para transporte de imagens grandes.
+  Perfil Fast-DDS (rmw_fastrtps_cpp, padrao do ROS 2 Humble) do projeto: todos os nos falam SO por
+  memoria compartilhada (SHM), com segmento de 32 MB.
 
-  Problema: o transporte de memoria compartilhada (SHM) padrao do Fast-DDS usa segmento de
-  512 KB. Mensagens maiores (um frame 1280x720 bgr8 = 2,7 MB; 640x480 = 921 KB) caem para
-  UDP fragmentado e, com QoS best-effort, perdem fragmentos: medido 4-6 fps recebidos de
-  24 publicados no WSL2. Com segmento de 32 MB o mesmo pipeline recebe 24/24 fps.
+  Por que segmento grande: o SHM padrao do Fast-DDS usa segmento de 512 KB. Mensagens maiores (um
+  frame 1280x720 bgr8 = 2,7 MB; 640x480 = 921 KB) caiam para UDP fragmentado e, com QoS
+  best-effort, perdiam fragmentos: medido 4-6 fps recebidos de 24 publicados no WSL2. Com
+  segmento de 32 MB o mesmo pipeline recebe 24/24 fps.
 
-  Uso: o launch do pacote ja exporta FASTRTPS_DEFAULT_PROFILES_FILE apontando para este
-  arquivo. Para `ros2 run` manual:
-    export FASTRTPS_DEFAULT_PROFILES_FILE=$(ros2 pkg prefix projeto_bloco)/share/projeto_bloco/config/fastdds_profile.xml
-  UDPv4 e mantido para descoberta e para nos/ferramentas em outros hosts ou sem o perfil.
+  Por que sem UDP (TP4): com SHM + UDP juntos, a DESCOBERTA dos nos sai pelo UDP. No WSL2 com rede
+  espelhada (networkingMode=mirrored) e VPN ligada, o UDP entre processos da mesma maquina deixou
+  de entregar: um assinante novo nao achava o publicador em 70 s, o spawn do robo levava 30 s e o
+  lifecycle manager do Nav2 estourava o tempo dos servicos. So com SHM a descoberta leva 0,01 s e
+  nao depende de interface de rede, multicast, firewall ou VPN. As demos do projeto rodam numa
+  maquina so, entao nada se perde.
+
+  Consequencia: um terminal SEM este perfil nao enxerga os nos. Os launch files do pacote ja
+  exportam FASTRTPS_DEFAULT_PROFILES_FILE; em terminais manuais use `source ros2_ws/ambiente.sh`
+  (ou exporte a variavel apontando para este arquivo). Se o `ros2 topic list` vier vazio depois
+  disso, rode `ros2 daemon stop` (o daemon antigo subiu sem o perfil). Para falar com outra
+  maquina (robo real), use outro perfil, com UDPv4 na interface da rede local.
 -->
 <profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
   <transport_descriptors>
@@ -19,17 +28,12 @@
       <type>SHM</type>
       <segment_size>33554432</segment_size>
     </transport_descriptor>
-    <transport_descriptor>
-      <transport_id>udp_padrao</transport_id>
-      <type>UDPv4</type>
-    </transport_descriptor>
   </transport_descriptors>
 
-  <participant profile_name="participante_imagens" is_default_profile="true">
+  <participant profile_name="participante_local" is_default_profile="true">
     <rtps>
       <userTransports>
         <transport_id>shm_grande</transport_id>
-        <transport_id>udp_padrao</transport_id>
       </userTransports>
       <useBuiltinTransports>false</useBuiltinTransports>
     </rtps>

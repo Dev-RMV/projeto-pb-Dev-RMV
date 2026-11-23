@@ -98,6 +98,68 @@
                                  # um alvo com o robo ainda parado olhando para os alvos
     taxa_hz: 20.0
 
+# ---------- TP4: navegacao com Nav2 (patrulha, behavior tree e obstaculo surpresa) ----------
+/patrulha:
+  ros__parameters:
+    # action que recebe os goals NavigateToPose: "navegar_com_pausa" (no arvore_navegacao) ou
+    # "navigate_to_pose" (direto no Nav2); o navegacao.launch.py escolhe pelo argumento arvore:=
+    acao: "navegar_com_pausa"
+    # rota da patrulha: um goal por posto, na ordem; cada posto tem x, y (m, frame map), yaw_graus
+    # e engajar (true = posto de tiro: ao chegar, engaja o alvo com a action /engajar_alvo)
+    postos: ["posto_alvo_2", "posto_alvo_1", "posto_alvo_3", "vigia_oeste", "base"]
+    # (a distancia ao alvo deixa a folha inteira no quadro da camera mesmo com o erro de chegada)
+    posto_alvo_2: {x: 1.30, y: -1.61, yaw_graus: 23.0, engajar: true}    # 1,3 m a frente do alvo 2
+    posto_alvo_1: {x: 0.70, y: 0.30, yaw_graus: 0.0, engajar: true}      # 1,5 m a frente do alvo 1
+    posto_alvo_3: {x: 1.44, y: 1.60, yaw_graus: 0.0, engajar: true}      # 1,5 m a frente do alvo 3
+    vigia_oeste: {x: -0.80, y: 0.80, yaw_graus: 180.0, engajar: false}   # olha o lado oeste da sala
+    base: {x: 0.00, y: 0.00, yaw_graus: 0.0, engajar: false}             # volta para a origem
+    voltas: 1
+    tentativas: 2                # envios do mesmo goal antes de pular o posto
+    espera_posto_s: 2.0          # parado em cada posto (depois do disparo) antes de seguir
+    tempo_max_goal_s: 180.0      # cancela o goal que passar disso
+    tempo_max_nav2_s: 180.0      # espera pelo Nav2 ativo e pelo AMCL
+    engajar_classe: "alvo"
+    engajar_tempo_max_s: 10.0    # desiste do disparo depois disso e segue a patrulha
+    arquivo_csv: ""              # "" = so log
+
+/arvore_navegacao:
+  ros__parameters:
+    periodo_tick: 0.1            # s entre ticks da behavior tree
+    distancia_parada_m: 0.5      # obstaculo mais perto que isso interrompe a navegacao
+    histerese_m: 0.1             # a condicao rearma quando o setor volta a 0,6 m
+    setor_graus: 60.0            # abertura total do setor frontal do lidar (+-30 graus)
+    espera_s: 2.0                # tempo parado antes de retomar o goal
+    acao: "navegar_com_pausa"    # action server da arvore (entrada do goal)
+    acao_nav2: "navigate_to_pose"    # action do bt_navigator do Nav2
+
+/obstaculo_surpresa:
+  ros__parameters:
+    # zona de gatilho no trecho posto do alvo 3 -> vigia oeste (30% do caminho)
+    gatilho_x: 0.80
+    gatilho_y: 1.37
+    gatilho_raio: 0.30
+    velocidade_min: 0.10         # so dispara com o robo andando para a frente
+    distancia_m: 0.55            # do lidar ate a face da caixa: o robo anda mais 5 cm e cruza os
+                                 # 0,5 m da arvore; mais perto que isso ele para colado na caixa
+    lado_m: 0.30
+    altura_m: 0.50               # acima do plano do lidar (0,285 m)
+    lidar_x: -0.09               # posicao do lidar no base_footprint (URDF)
+    remover_apos_s: 0.0          # 0 = a caixa fica no caminho e o Nav2 tem de contornar
+    nome: "caixa_surpresa"
+
+/analise_bag:
+  ros__parameters:
+    # os mesmos criterios da arvore_navegacao, para refazer a conta em cima do bag
+    distancia_parada_m: 0.5
+    histerese_m: 0.1
+    setor_graus: 60.0
+    espera_s: 2.0
+    reacao_max_s: 1.5            # da deteccao no /scan ate o robo parado no /odom
+    pausas_min: 1                # a sessao precisa ter pelo menos uma pausa para valer
+    silencio_s: 5.0              # sem mensagens por esse tempo = a reproducao terminou
+    # obstaculos do mundo que nao estao no mapa, so para desenhar no grafico: "nome x y lado"
+    fora_do_mapa: ["caixote_novo 0.60 -0.75 0.30"]
+
 /cliente_engajar:
   ros__parameters:
     classes: ["alvo"]            # um goal por item, em sequencia

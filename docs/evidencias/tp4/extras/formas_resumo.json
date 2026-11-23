@@ -1,0 +1,152 @@
+{
+  "mapa": "SCSS",
+  "semente": 0,
+  "faixa_inicial": 2,
+  "resolucao": [
+    640,
+    360
+  ],
+  "passos": 500,
+  "cada": 2,
+  "frames_processados": 250,
+  "placas_na_cena": 14,
+  "raio_min_px": 10.0,
+  "placas_visiveis": 297,
+  "forma_certa": 275,
+  "taxa_forma_certa": 0.9259,
+  "falsos_positivos": 1,
+  "falsos_positivos_por_frame": 0.004,
+  "por_forma": {
+    "circular": {
+      "visiveis": 87,
+      "detectadas": 77,
+      "forma_certa": 76,
+      "achado": {
+        "circular": 76,
+        "losango": 1
+      },
+      "taxa_forma_certa": 0.8736
+    },
+    "losango": {
+      "visiveis": 65,
+      "detectadas": 63,
+      "forma_certa": 62,
+      "achado": {
+        "losango": 62,
+        "indefinida": 1
+      },
+      "taxa_forma_certa": 0.9538
+    },
+    "octogonal": {
+      "visiveis": 65,
+      "detectadas": 63,
+      "forma_certa": 61,
+      "achado": {
+        "octogonal": 61,
+        "losango": 2
+      },
+      "taxa_forma_certa": 0.9385
+    },
+    "triangular": {
+      "visiveis": 80,
+      "detectadas": 76,
+      "forma_certa": 76,
+      "achado": {
+        "triangular": 76
+      },
+      "taxa_forma_certa": 0.95
+    }
+  },
+  "por_raio_aparente": {
+    "10-15 px": {
+      "visiveis": 119,
+      "forma_certa": 97,
+      "taxa_forma_certa": 0.8151
+    },
+    "15-25 px": {
+      "visiveis": 100,
+      "forma_certa": 100,
+      "taxa_forma_certa": 1.0
+    },
+    "25-45 px": {
+      "visiveis": 61,
+      "forma_certa": 61,
+      "taxa_forma_certa": 1.0
+    },
+    "45+ px": {
+      "visiveis": 17,
+      "forma_certa": 17,
+      "taxa_forma_certa": 1.0
+    }
+  },
+  "ms_por_frame": 2.59,
+  "parametros": {
+    "cores": {
+      "vermelho": [
+        [
+          [
+            0,
+            120,
+            90
+          ],
+          [
+            8,
+            255,
+            255
+          ]
+        ],
+        [
+          [
+            170,
+            120,
+            90
+          ],
+          [
+            179,
+            255,
+            255
+          ]
+        ]
+      ],
+      "amarelo": [
+        [
+          [
+            18,
+            170,
+            160
+          ],
+          [
+            34,
+            255,
+            255
+          ]
+        ]
+      ]
+    },
+    "lado_min": 14,
+    "proporcao": [
+      0.55,
+      1.8
+    ],
+    "solidez_min": 0.85,
+    "lado_silhueta": 128,
+    "margem_silhueta": 16,
+    "suavizacao": 2.0,
+    "circulo": {
+      "dp": 1.0,
+      "param1": 100.0,
+      "param2": 22.0,
+      "raio_min": 40,
+      "raio_max": 56
+    },
+    "harris": {
+      "bloco": 9,
+      "abertura": 5,
+      "k": 0.04,
+      "fracao": 0.28,
+      "resposta_min": 0.008,
+      "vizinhanca": 17
+    },
+    "canto_agudo": 0.19
+  }
+}

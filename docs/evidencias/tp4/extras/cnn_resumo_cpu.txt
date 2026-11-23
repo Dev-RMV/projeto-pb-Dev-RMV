@@ -1,0 +1,16 @@
+CNN de estados da via (MetaDrive) - com e sem data augmentation
+dataset: /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset (treino 350, validacao 75, teste 75 frames; classes via_livre, obstaculo, cruzamento)
+rede: 1061603 parametros; entrada 90x160; 60 epocas; lote 32; Adam 0.0003; dispositivo: CPU (nenhuma GPU encontrada pelo TensorFlow); TensorFlow 2.21.0
+augmentation: rotacao +-15 graus, zoom 0.2, flip horizontal
+
+avaliacao com os pesos da epoca de maior accuracy de validacao:
+  sem augmentation  epoca 18 | accuracy treino 0.986, validacao 0.987, teste 0.813, teste perturbado 0.667 | loss validacao 0.097, teste 0.600 | gap treino-validacao -0.001, treino-teste +0.172 | 114 s
+  com augmentation  epoca 39 | accuracy treino 0.886, validacao 0.987, teste 0.867, teste perturbado 0.787 | loss validacao 0.145, teste 0.728 | gap treino-validacao -0.101, treino-teste +0.019 | 83 s
+
+media das 5 ultimas epocas (curvas): accuracy de validacao 0.963 sem e 0.773 com; loss de validacao 0.151 sem e 1.071 com
+
+efeito da augmentation (com - sem): accuracy no teste +0.053; accuracy no teste perturbado +0.120; accuracy na validacao +0.000; loss no teste +0.127; gap treino-validacao -0.100; gap treino-teste -0.153; loss de validacao no fim do treino +0.920
+teste perturbado = os frames de teste com rotacao de +-15 graus, zoom de 0.2 e flip horizontal sorteados uma vez (semente 1042)
+matriz de confusao no teste (linhas = classe real, colunas = prevista; via_livre, obstaculo, cruzamento):
+  sem augmentation: [[18, 3, 4], [5, 19, 1], [1, 0, 24]]
+  com augmentation: [[17, 4, 4], [1, 24, 0], [1, 0, 24]]

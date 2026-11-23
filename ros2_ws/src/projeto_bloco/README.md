@@ -4,9 +4,90 @@ ROS 2 Humble (Python) do Robo Sniper. Pacotes do workspace:
 
 | Pacote | Conteudo |
 |---|---|
-| `projeto_bloco` | nos, launch files (`bringup.launch.py` do TP3, `tp2.launch.py`, `projeto_bloco.launch.py` do TP1), `config/*.yaml`, RViz, `modelos/*.pt` (detector de alvos v8s, detector leve v8n para o UNO Q e segmentador v8n-seg) |
+| `projeto_bloco` | nos, launch files (`navegacao.launch.py` do TP4, `bringup.launch.py` do TP3, `tp2.launch.py`, `projeto_bloco.launch.py` do TP1), `config/*.yaml`, `maps/` (mapa da sala), RViz, `modelos/*.pt` (detector de alvos v8s, detector leve v8n para o UNO Q e segmentador v8n-seg) |
 | `projeto_bloco_interfaces` | msg `DeteccaoObj`, `DeteccaoArray`, `Face`, `FaceArray`; srv `ControleArma`, `VisionStatus`, `FaceStatus`; action `EngajarAlvo` |
-| `projeto_bloco_description` | URDF/xacro do robo, RViz, Gazebo Classic 11 (mundos `alvos.world` e `sala_alvos.world`) e o modelo `alvo_impresso` (folha com a arte real do alvo) |
+| `projeto_bloco_description` | URDF/xacro do robo, RViz, Gazebo Classic 11 (mundos `alvos.world`, `sala_alvos.world` e `sala_patrulha.world`) e o modelo `alvo_impresso` (folha com a arte real do alvo) |
+| `tp4_extras` | itens do TP4 que nao sao do robo: percepcao veicular no MetaDrive (faixas, formas) e CNN de estados da via; tem README proprio |
+
+## TP4: navegacao autonoma com Nav2, patrulha dos postos de tiro, behavior tree e bag
+
+```
+                 navegacao.launch.py (um comando; config/params.yaml + navegacao.yaml + nav2.yaml)
+ 1. gzserver/gzclient (sala_patrulha.world) + robot_state_publisher (URDF)   2. spawn do robo na origem
+ 3. (depois do spawn) Nav2 = nav2_bringup/bringup_launch.py com config/nav2.yaml:
+      map_server (maps/sala_alvos.yaml) -> /map      amcl: /scan + /map -> TF map->odom, /amcl_pose
+      planner_server (NavFn + costmap global)  controller_server (Rotation Shim + DWB + costmap local)
+      behavior_server, bt_navigator (action /navigate_to_pose), velocity_smoother -> /cmd_vel
+    patrulha --goal NavigateToPose--> arvore_navegacao (/navegar_com_pausa) --goal--> /navigate_to_pose
+       |  em cada posto de tiro: goal /engajar_alvo (TP2)        ^ /scan: obstaculo a menos de 0,5 m
+       v                                                          |   -> cancela, espera 2 s, reenvia
+    servidor_engajar <- rastreador_yolo <- camera do Gazebo      obstaculo_surpresa -> /spawn_entity
+ 4. ros2 bag record (argumento bag:=) grava a sessao   5. encerrar:=true fecha tudo ao fim da patrulha
+```
+
+| No | Faz | Publica / serve |
+|---|---|---|
+| `patrulha` | envia **goals de pose em sequencia** (`nav2_msgs/action/NavigateToPose`), um por posto da lista `postos` (`<posto>.x`, `.y`, `.yaw_graus`, `.engajar`); espera o Nav2 ativo e o AMCL localizado; em posto de tiro arma a torre e envia um goal `/engajar_alvo`; repete goal abortado ate `tentativas` vezes | `/patrulha/rota` (`nav_msgs/Path`), `/patrulha/status` (String), CSV opcional |
+| `arvore_navegacao` | **behavior tree em Python puro** (classes `Estado`, `No`, `Sequence`, `Fallback`, condicao e acoes; tick por timer): com o lidar vendo um obstaculo novo a menos de `distancia_parada_m` (0,5 m) no setor frontal, **cancela o goal no Nav2, espera `espera_s` (2 s) parado e reenvia o mesmo goal** | action server `/navegar_com_pausa` (`NavigateToPose`), `/arvore/estado` (OCIOSO, NAVEGANDO, PAUSADO, CHEGOU, FALHOU), `/arvore/distancia_frontal` |
+| `obstaculo_surpresa` | quando o robo entra andando na zona de gatilho, cria no Gazebo (`/spawn_entity`) uma caixa a 0,55 m do lidar, na frente do robo: obstaculo fora do mapa que surge ja perto e entra nos 0,5 m da arvore em seguida | `/obstaculo_surpresa/status` |
+| `analise_bag` | **validacao offline**: ouve um `ros2 bag play`, refaz a conta da distancia frontal no `/scan` gravado e confere, pelo `/odom`, que cada deteccao a menos de 0,5 m parou o robo por pelo menos 2 s antes de ele retomar; conta os postos alcancados | `trajetoria.png`, `pausa_obstaculo.png`, `validacao.txt`, `validacao.json` |
+
+Arvore do `arvore_navegacao` (o tick desce da raiz a cada 0,1 s):
+
+```
+Sequence "Raiz"
+  Fallback "CaminhoSeguro"
+    CaminhoLivre               Condition  /scan, setor frontal de 60 graus, distancia >= 0,5 m
+    Sequence "PausaPorObstaculo"
+      InterromperNavegacao     Action     cancela o goal no Nav2 e espera a odometria zerar
+      Esperar                  Action     RUNNING ate completar 2 s (relogio do Gazebo)
+      RetomarGoal              Action     libera a retomada
+  NavegarParaPose              Action     mantem o goal NavigateToPose no Nav2; RUNNING ate chegar
+```
+
+### Rodar
+
+Na raiz do repositorio: `./scripts/reproduzir.sh` (compila, sobe a navegacao gravando o bag, mostra o
+`ros2 bag info`, reproduz o bag para o `analise_bag` e chama os extras do TP4). Manualmente, cada
+terminal com `source ros2_ws/ambiente.sh`:
+
+```bash
+cd ros2_ws && colcon build --symlink-install && source ambiente.sh
+ros2 launch projeto_bloco navegacao.launch.py                    # patrulha com a behavior tree
+ros2 launch projeto_bloco navegacao.launch.py arvore:=false surpresa:=false   # so Nav2 + patrulha
+ros2 launch projeto_bloco navegacao.launch.py patrulhar:=false surpresa:=false  # goals a mao:
+#   RViz: botao "2D Goal Pose" (vai direto ao Nav2), ou pela arvore:
+ros2 action send_goal /navegar_com_pausa nav2_msgs/action/NavigateToPose \
+  "{pose: {header: {frame_id: map}, pose: {position: {x: 1.0, y: 0.3}, orientation: {w: 1.0}}}}" --feedback
+# gravar a sessao e validar offline (sem Gazebo nem Nav2 na segunda parte)
+ros2 launch projeto_bloco navegacao.launch.py bag:=$HOME/bag_patrulha encerrar:=true
+ros2 bag info $HOME/bag_patrulha
+ros2 run projeto_bloco analise_bag --ros-args -p pasta:=$HOME/analise &   # espera a reproducao
+ros2 bag play $HOME/bag_patrulha --clock
+```
+
+### Notas do TP4
+
+- **Mapa**: `maps/sala_alvos.{pgm,yaml}` e o mapa que o SLAM Toolbox construiu no TP3 (5 cm por celula,
+  origem do mapa = origem do mundo). O mundo `sala_patrulha.world` e a mesma sala, sem a bola (fica
+  abaixo do plano do lidar) e com um caixote que nao esta no mapa.
+- **Localizacao**: AMCL com `set_initial_pose` (o robo nasce na origem) e o modelo de movimento
+  **omnidirecional**. Com o modelo diferencial a localizacao se perdia em todo giro no lugar: a esteira
+  escorrega de lado e esse passo lateral era lido como rotacao de 90 graus (detalhes em
+  `docs/decisoes.md`).
+- **Costmaps**: global = mapa estatico + camada de obstaculos do lidar + inflacao (0,40 m); local =
+  janela de 3 x 3 m no frame `odom`, camada de obstaculos + inflacao. Robo como circulo de 0,20 m.
+- **Planejador e controlador**: NavFn (Dijkstra) no costmap global; Rotation Shim + DWB no local (gira
+  no lugar ate alinhar com o caminho, depois o DWB segue e desvia). A arvore interna do Nav2 e a que so
+  replaneja quando o caminho fica invalido.
+- **Duas arvores**: a do `bt_navigator` (XML do Nav2) cuida de planejar, seguir e recuperar; a
+  `arvore_navegacao` (Python, deste pacote) decide a pausa de 2 s. Depois de uma pausa, o mesmo
+  obstaculo so gera outra se sair do setor e voltar (histerese de 0,1 m), para o Nav2 poder contorna-lo.
+- **Odometria**: no Gazebo o plugin das esteiras publica em `/odom` a pose real do robo no mundo; a
+  analise usa isso como referencia para medir o erro do AMCL.
+- **DDS**: `config/fastdds_profile.xml` agora usa so memoria compartilhada; terminais manuais precisam
+  do `source ros2_ws/ambiente.sh` para enxergar os nos. O `ambiente.sh` tambem sobe o daemon da CLI do
+  ros2: no WSL2 com rede espelhada o primeiro `ros2 topic list` travava por minutos sem isso.
 
 ## TP3: bringup unico (Gazebo + URDF + SLAM Toolbox + percepcao + RViz) e segmentacao por instancia
 

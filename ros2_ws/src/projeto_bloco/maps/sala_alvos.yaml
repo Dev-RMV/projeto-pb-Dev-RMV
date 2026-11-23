@@ -1,0 +1,12 @@
+# Mapa de ocupacao da sala (sala_alvos.world / sala_patrulha.world), 5 cm por celula.
+# Construido pelo SLAM Toolbox no bringup do TP3 e salvo com
+#   ros2 run nav2_map_server map_saver_cli -f mapa_tp3 --ros-args -p use_sim_time:=true
+# (scripts/reproduzir_tp3.sh, passo 3). No TP4 e o mapa estatico do map_server: o AMCL localiza o
+# robo nele e o costmap global parte dele. A origem do frame map e a origem do mundo do Gazebo.
+image: sala_alvos.pgm
+mode: trinary
+resolution: 0.05
+origin: [-2.99, -2.98, 0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25

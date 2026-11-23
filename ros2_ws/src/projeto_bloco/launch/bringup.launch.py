@@ -1,5 +1,7 @@
 """
-TP3: bringup unico do Robo Sniper. Um comando sobe, EM SEQUENCIA:
+TP3: bringup unico do Robo Sniper, tudo com um comando.
+
+O launch sobe, EM SEQUENCIA:
 
   1. Gazebo Classic 11 com o mundo do projeto (sala com obstaculos e alvos impressos com a arte
      real) e o robot_state_publisher com o URDF (xacro);
@@ -10,8 +12,8 @@ TP3: bringup unico do Robo Sniper. Um comando sobe, EM SEQUENCIA:
      percepcao do TP2 (rastreador_yolo + servidor_engajar) mais o segmentador_yolo do TP3
      (/vision/segmented), todos lendo a camera simulada;
   4. RViz2 com a configuracao salva (rviz/bringup.rviz: mapa, scan, TF, robo e as imagens);
-  5. 3 s depois, o piloto_demo sobe; apos a espera inicial (30 s, config/params.yaml) ele percorre a
-     rota (quadrado de 1,4 m e um giro completo) para o mapa ser construido;
+  5. 3 s depois, o piloto_demo sobe; apos a espera inicial (30 s, config/params.yaml) ele percorre
+     a rota (quadrado de 1,4 m e um giro completo) para o mapa ser construido;
   6. 10 s depois do spawn, o cliente_engajar arma a torre e envia os goals de engajamento
      (config/bringup.yaml: tres goals na classe "alvo"), com o robo ainda parado olhando para os
      alvos: a torre mira e "dispara" (/torre/visao mostra MIRANDO -> TRAVADO -> DISPARO).
@@ -47,7 +49,8 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 
 def pythonpath_com_venv():
-    """PYTHONPATH com o site-packages de <ws>/.venv (venv do YOLO) na frente, se ele existir.
+    """
+    PYTHONPATH com o site-packages de <ws>/.venv (venv do YOLO) na frente, se ele existir.
 
     <ws> e achado subindo a partir da instalacao do pacote (<ws>/install/projeto_bloco), como o
     ros2_ws/ambiente.sh faz; sem o venv devolve o PYTHONPATH atual (e os nos do YOLO avisam).
@@ -56,7 +59,8 @@ def pythonpath_com_venv():
     pasta = get_package_prefix('projeto_bloco')
     for _ in range(3):
         pasta = os.path.dirname(pasta)
-        for site in sorted(glob.glob(os.path.join(pasta, '.venv', 'lib', 'python3*', 'site-packages'))):
+        for site in sorted(glob.glob(os.path.join(pasta, '.venv', 'lib', 'python3*',
+                                                  'site-packages'))):
             if site not in atual.split(os.pathsep):
                 return site + (os.pathsep + atual if atual else '')
             return atual
@@ -75,18 +79,22 @@ def generate_launch_description():
     show = LaunchConfiguration('show')
 
     argumentos = [
-        DeclareLaunchArgument('world', default_value=os.path.join(desc, 'worlds', 'sala_alvos.world'),
+        DeclareLaunchArgument('world',
+                              default_value=os.path.join(desc, 'worlds', 'sala_alvos.world'),
                               description='mundo do Gazebo'),
-        DeclareLaunchArgument('gui', default_value='true', description='janela do Gazebo (gzclient)'),
+        DeclareLaunchArgument('gui', default_value='true',
+                              description='janela do Gazebo (gzclient)'),
         DeclareLaunchArgument('rviz', default_value='true', description='RViz2'),
-        DeclareLaunchArgument('rviz_config', default_value=os.path.join(share, 'rviz', 'bringup.rviz')),
+        DeclareLaunchArgument('rviz_config',
+                              default_value=os.path.join(share, 'rviz', 'bringup.rviz')),
         DeclareLaunchArgument('slam', default_value='true', description='SLAM Toolbox'),
-        DeclareLaunchArgument('slam_params', default_value=os.path.join(share, 'config', 'slam.yaml')),
+        DeclareLaunchArgument('slam_params',
+                              default_value=os.path.join(share, 'config', 'slam.yaml')),
         DeclareLaunchArgument('piloto', default_value='true',
                               description='piloto_demo percorre a rota (false = teleop a mao)'),
         DeclareLaunchArgument('engajar', default_value='true',
                               description='cliente_engajar arma a torre e envia os goals do '
-                                          'config/bringup.yaml 10 s apos o spawn (false = so a mao)'),
+                                          'config/bringup.yaml 10 s apos o spawn (false = a mao)'),
         DeclareLaunchArgument('show', default_value='false', description='janelas cv2.imshow'),
     ]
 
@@ -140,7 +148,7 @@ def generate_launch_description():
              parameters=[params, bringup], condition=IfCondition(LaunchConfiguration('piloto')))])
 
     # ---- 6. engajamento automatico: o action client arma a torre e envia os goals (classes do
-    #         bringup.yaml) 10 s depois do spawn, com o robo ainda parado olhando para os alvos ----
+    #         bringup.yaml) 10 s depois do spawn, com o robo ainda parado olhando para os alvos
     engajador = TimerAction(period=10.0, actions=[
         Node(package='projeto_bloco', executable='cliente_engajar', output='screen',
              parameters=[params, bringup], condition=IfCondition(LaunchConfiguration('engajar')))])

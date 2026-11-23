@@ -1,0 +1,48 @@
+{
+  "duracao_s": 82.9,
+  "percorrido_m": 9.45,
+  "velocidade_max_m_s": 0.252,
+  "mensagens": {
+    "scan": 830,
+    "odom": 2440,
+    "cmd_vel": 1444,
+    "amcl_pose": 168,
+    "arvore_estado": 829,
+    "patrulha_status": 14
+  },
+  "postos_alcancados": 5,
+  "postos_falhos": 0,
+  "disparos": 3,
+  "fim_da_patrulha": "fim postos=5/5 disparos=3/3 percorrido_m=9.45 duracao_s=80.2",
+  "erro_amcl": {
+    "amostras": 167,
+    "medio_m": 0.063,
+    "max_m": 0.099
+  },
+  "pausas": [
+    {
+      "distancia_m": 0.494,
+      "reacao_s": 0.19,
+      "parado_s": 2.14,
+      "pausado_arvore_s": 2.21,
+      "x": 1.011,
+      "y": 1.469,
+      "estado_arvore": "NAVEGANDO",
+      "ok": true,
+      "t_s": 56.35
+    }
+  ],
+  "criterios": {
+    "distancia_parada_m": 0.5,
+    "espera_s": 2.0,
+    "reacao_max_s": 1.5,
+    "setor_graus": 60.0,
+    "pausas_min": 1
+  },
+  "validado": {
+    "pausa_por_obstaculo": true,
+    "estado_da_arvore": true,
+    "postos": true
+  },
+  "aprovado": true
+}

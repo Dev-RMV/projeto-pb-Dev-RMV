@@ -1,9 +1,11 @@
 """
-Salva um quadro de cada topico de imagem (evidencias): espera o primeiro frame de cada topico da
-lista e grava <pasta>/<nome_do_topico>.jpg; sai quando todos chegaram ou no timeout.
+Salva um quadro de cada topico de imagem (evidencias).
+
+Espera o primeiro frame de cada topico da lista e grava <pasta>/<nome_do_topico>.jpg; sai quando
+todos chegaram ou no timeout.
 
   ros2 run projeto_bloco salvar_imagens --ros-args -p pasta:=ros2_ws/log/evidencias \
-      -p "topicos:=['/vision/segmented', '/vision/rastreamento', '/torre/visao', '/camera/image_raw']"
+      -p "topicos:=['/vision/segmented', '/vision/rastreamento', '/torre/visao']"
 """
 
 import os

@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!--
+  Mundo do TP4 (navegacao autonoma com Nav2): a mesma sala 6 x 6 m do sala_alvos.world (paredes,
+  pilar, caixas, muro e as tres folhas A4 com a arte real do alvo), que e a sala do mapa salvo em
+  projeto_bloco/maps/sala_alvos.yaml. Diferencas:
+    - sem a bola (0,24 m de altura): fica abaixo do plano do lidar (0,285 m), entao nao entra no
+      costmap e o robo trombaria nela;
+    - um caixote que NAO esta no mapa (caixote_novo), no meio do trecho base -> posto do alvo 2: o
+      Nav2 so sabe dele pelo lidar e precisa desviar (camada de obstaculos dos costmaps).
+  A caixa surpresa da behavior tree nao esta aqui: o no obstaculo_surpresa a cria durante a patrulha.
+  Rota da patrulha (config/params.yaml): base (0, 0) -> posto do alvo 2 -> posto do alvo 1 ->
+  posto do alvo 3 -> vigia oeste -> base; todos os postos ficam a mais de 0,5 m dos obstaculos.
+-->
+<sdf version="1.6">
+  <world name="sala_patrulha">
+    <!-- camera da janela do Gazebo: de cima, com a sala inteira no quadro (x para a direita e y
+         para cima, como no RViz e no grafico da trajetoria) -->
+    <gui>
+      <camera name="user_camera">
+        <pose>0 -5.2 7.0 0 0.93 1.5708</pose>
+      </camera>
+    </gui>
+    <include><uri>model://ground_plane</uri></include>
+    <include><uri>model://sun</uri></include>
+
+    <!-- paredes: 6 x 6 m, 0,5 m de altura -->
+    <model name="paredes">
+      <static>true</static>
+      <link name="link">
+        <collision name="c_norte"><pose>3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry></collision>
+        <visual name="v_norte"><pose>3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c_sul"><pose>-3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry></collision>
+        <visual name="v_sul"><pose>-3 0 0.25 0 0 0</pose><geometry><box><size>0.1 6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c_leste"><pose>0 -3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry></collision>
+        <visual name="v_leste"><pose>0 -3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+        <collision name="c_oeste"><pose>0 3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry></collision>
+        <visual name="v_oeste"><pose>0 3 0.25 0 0 0</pose><geometry><box><size>6 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- obstaculos do mapa (os mesmos do sala_alvos.world) -->
+    <model name="pilar">
+      <static>true</static>
+      <pose>-1.5 1.5 0.3 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.2</radius><length>0.6</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.2</radius><length>0.6</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Orange</name></script></material></visual>
+      </link>
+    </model>
+    <model name="caixa_a">
+      <static>true</static>
+      <pose>1.0 2.4 0.25 0 0 0.3</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.6 0.4 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.6 0.4 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+    <model name="caixa_b">
+      <static>true</static>
+      <pose>-1.8 -1.6 0.2 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.8 0.5 0.4</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.5 0.4</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+    <model name="muro">
+      <static>true</static>
+      <pose>0.6 -2.2 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>1.4 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.4 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- obstaculo FORA do mapa: caixote de 0,3 x 0,3 x 0,4 m no trecho base -> posto do alvo 2 -->
+    <model name="caixote_novo">
+      <static>true</static>
+      <pose>0.60 -0.75 0.2 0 0 0.6</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.3 0.3 0.4</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.3 0.3 0.4</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Yellow</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- postes de madeira dos alvos 1 e 2 (0,25 m; a folha fica em cima) -->
+    <model name="poste_1">
+      <static>true</static>
+      <pose>2.2 0.3 0.125 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+    <model name="poste_2">
+      <static>true</static>
+      <pose>2.5 -1.1 0.125 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.015</radius><length>0.25</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+    </model>
+
+    <!-- alvos impressos (folha A4 com a arte real): centro da folha a 0,40 m do chao -->
+    <include>
+      <uri>model://alvo_impresso</uri>
+      <name>alvo_1</name>
+      <pose>2.2 0.3 0.40 0 0 0</pose>
+    </include>
+    <include>
+      <uri>model://alvo_impresso</uri>
+      <name>alvo_2</name>
+      <pose>2.5 -1.1 0.40 0 0 0.4</pose>
+    </include>
+    <include>   <!-- pendurado na parede norte -->
+      <uri>model://alvo_impresso</uri>
+      <name>alvo_3</name>
+      <pose>2.94 1.6 0.35 0 0 0</pose>
+    </include>
+  </world>
+</sdf>

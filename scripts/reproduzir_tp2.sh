@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# reproduzir_tp2.sh — demo do TP2 (o reproduzir.sh passou a rodar o TP3). Mesmo contrato:
+# reproduzir_tp2.sh — demo do TP2 (o reproduzir.sh roda a demo do TP corrente). Mesmo contrato:
 # compila, confere os insumos e sobe a demo; se faltar dependência chama setup.sh sozinho.
 #   Sobe o tp2.launch.py: camera_publisher (ros2_ws/midia/alvos_dv20.mp4, robo no campo de tiro)
 #   -> rastreador_yolo (YOLOv8s treinado para alvos + ByteTrack + filtro de Kalman) -> servidor_engajar

@@ -55,7 +55,7 @@ def faixa(de, ate, inteiro=False):
 
 
 def caminho_do_modelo(nome, pasta_modelos):
-    """Nome sem caminho: share/projeto_bloco/modelos (treinados aqui) ou pasta_modelos (oficiais)."""
+    """Nome sem caminho: share/projeto_bloco/modelos (daqui) ou pasta_modelos (oficiais)."""
     nome = os.path.expanduser(nome)
     if os.sep in nome:
         return nome
@@ -109,7 +109,8 @@ class SegmentadorYolo(Node):
         self.add_on_set_parameters_callback(self.ao_mudar_parametros)
         self.get_logger().info(
             f"{self.cfg['topico_entrada']} -> /vision/segmented (alpha {self.cfg['alpha']:.2f}), "
-            f"/vision/segmentacao; conf >= {self.cfg['confianca']:.2f}, {self.cfg['frequencia_hz']:.1f} Hz")
+            f"/vision/segmentacao; conf >= {self.cfg['confianca']:.2f}, "
+            f"{self.cfg['frequencia_hz']:.1f} Hz")
 
     def carregar_modelo(self, cfg):
         caminho = caminho_do_modelo(cfg['modelo'], cfg['pasta_modelos'])
@@ -120,8 +121,9 @@ class SegmentadorYolo(Node):
         if modelo.task != 'segment':
             raise ValueError(f'{caminho} nao e um modelo de segmentacao (task={modelo.task})')
         modelo.predict(np.zeros((64, 64, 3), np.uint8), device=cfg['dispositivo'], verbose=False)
-        self.get_logger().info(f"modelo {caminho} carregado em {cfg['dispositivo']} "
-                               f"({time.monotonic() - t0:.1f} s); classes {list(modelo.names.values())}")
+        self.get_logger().info(
+            f"modelo {caminho} carregado em {cfg['dispositivo']} "
+            f"({time.monotonic() - t0:.1f} s); classes {list(modelo.names.values())}")
         return modelo
 
     def ao_mudar_parametros(self, params):

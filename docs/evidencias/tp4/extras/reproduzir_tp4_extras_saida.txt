@@ -1,0 +1,152 @@
+### ./scripts/reproduzir_tp4_extras.sh  (clone limpo, sem GPU visivel: venv so de CPU; 680 s no total, venv 3,2 GB)
+[tp4_extras] criando o venv /home/rmv/tp4_extras_clone/ros2_ws/.venv_tp4 (requirements_tp4_extras.txt; ~3 GB, alguns minutos)
+
+[tp4_extras] ===== faixas =====
+[faixas] 300 frames (300 na via, 0 dentro de cruzamento)
+[faixas] na via: alguma linha em 100.0%, as duas linhas da faixa do veiculo em 86.7%
+[faixas] faixa do veiculo por bloco (I inicio, S reta, C curva): C 131/164, I 35/35, S 94/101
+[faixas] erro da borda esquerda contra o simulador: mediana 1.7 px, p90 75.3 px (606 medidas)
+[faixas] erro da borda direita contra o simulador: mediana 1.3 px, p90 15.2 px (549 medidas)
+[faixas] 2.6 ms por frame; saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/faixas
+
+[tp4_extras] ===== formas =====
+[formas] 250 frames, 14 placas na cena; 297 placas visiveis (raio >= 10 px): forma certa em 275 (92.6%); 1 falsos positivos
+[formas]   circular   visiveis   87 | detectadas   77 | forma certa   76 (87.4%) | {'circular': 76, 'losango': 1}
+[formas]   losango    visiveis   65 | detectadas   63 | forma certa   62 (95.4%) | {'losango': 62, 'indefinida': 1}
+[formas]   octogonal  visiveis   65 | detectadas   63 | forma certa   61 (93.8%) | {'octogonal': 61, 'losango': 2}
+[formas]   triangular visiveis   80 | detectadas   76 | forma certa   76 (95.0%) | {'triangular': 76}
+[formas] por raio aparente: 10-15 px 97/119, 15-25 px 100/100, 25-45 px 61/61, 45+ px 17/17
+[formas] 2.6 ms por frame; saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/formas
+
+[tp4_extras] ===== dataset =====
+[dataset] treino    semente 1000: via_livre 4/117, obstaculo 2/117, cruzamento 1/116
+[dataset] treino    semente 1001: via_livre 9/117, obstaculo 3/117, cruzamento 6/116
+[dataset] treino    semente 1002: via_livre 18/117, obstaculo 10/117, cruzamento 18/116
+[dataset] treino    semente 1003: via_livre 23/117, obstaculo 17/117, cruzamento 18/116
+[dataset] treino    semente 1004: via_livre 27/117, obstaculo 18/117, cruzamento 30/116
+[dataset] treino    semente 1005: via_livre 31/117, obstaculo 22/117, cruzamento 42/116
+[dataset] treino    semente 1006: via_livre 33/117, obstaculo 25/117, cruzamento 42/116
+[dataset] treino    semente 1007: via_livre 39/117, obstaculo 25/117, cruzamento 42/116
+[dataset] treino    semente 1008: via_livre 46/117, obstaculo 32/117, cruzamento 54/116
+[dataset] treino    semente 1009: via_livre 51/117, obstaculo 33/117, cruzamento 54/116
+[dataset] treino    semente 1010: via_livre 52/117, obstaculo 33/117, cruzamento 54/116
+[dataset] treino    semente 1011: via_livre 60/117, obstaculo 37/117, cruzamento 66/116
+[dataset] treino    semente 1012: via_livre 70/117, obstaculo 49/117, cruzamento 78/116
+[dataset] treino    semente 1013: via_livre 77/117, obstaculo 53/117, cruzamento 90/116
+[dataset] treino    semente 1014: via_livre 87/117, obstaculo 55/117, cruzamento 102/116
+[dataset] treino    semente 1015: via_livre 91/117, obstaculo 57/117, cruzamento 107/116
+[dataset] treino    semente 1016: via_livre 95/117, obstaculo 59/117, cruzamento 116/116
+[dataset] treino    semente 1017: via_livre 100/117, obstaculo 60/117, cruzamento 116/116
+[dataset] treino    semente 1018: via_livre 110/117, obstaculo 72/117, cruzamento 116/116
+[dataset] treino    semente 1019: via_livre 114/117, obstaculo 73/117, cruzamento 116/116
+[dataset] treino    semente 1020: via_livre 117/117, obstaculo 80/117, cruzamento 116/116
+[dataset] treino    semente 1021: via_livre 117/117, obstaculo 85/117, cruzamento 116/116
+[dataset] treino    semente 1022: via_livre 117/117, obstaculo 89/117, cruzamento 116/116
+[dataset] treino    semente 1023: via_livre 117/117, obstaculo 101/117, cruzamento 116/116
+[dataset] treino    semente 1024: via_livre 117/117, obstaculo 113/117, cruzamento 116/116
+[dataset] treino    semente 1025: via_livre 117/117, obstaculo 117/117, cruzamento 116/116
+[dataset] validacao semente 3000: via_livre 4/25, obstaculo 2/25, cruzamento 12/25
+[dataset] validacao semente 3001: via_livre 6/25, obstaculo 5/25, cruzamento 24/25
+[dataset] validacao semente 3002: via_livre 12/25, obstaculo 7/25, cruzamento 25/25
+[dataset] validacao semente 3003: via_livre 16/25, obstaculo 9/25, cruzamento 25/25
+[dataset] validacao semente 3004: via_livre 20/25, obstaculo 9/25, cruzamento 25/25
+[dataset] validacao semente 3005: via_livre 25/25, obstaculo 14/25, cruzamento 25/25
+[dataset] validacao semente 3006: via_livre 25/25, obstaculo 18/25, cruzamento 25/25
+[dataset] validacao semente 3007: via_livre 25/25, obstaculo 22/25, cruzamento 25/25
+[dataset] validacao semente 3008: via_livre 25/25, obstaculo 25/25, cruzamento 25/25
+[dataset] teste     semente 5000: via_livre 7/25, obstaculo 2/25, cruzamento 12/25
+[dataset] teste     semente 5001: via_livre 13/25, obstaculo 2/25, cruzamento 24/25
+[dataset] teste     semente 5002: via_livre 23/25, obstaculo 5/25, cruzamento 25/25
+[dataset] teste     semente 5003: via_livre 25/25, obstaculo 7/25, cruzamento 25/25
+[dataset] teste     semente 5004: via_livre 25/25, obstaculo 11/25, cruzamento 25/25
+[dataset] teste     semente 5005: via_livre 25/25, obstaculo 18/25, cruzamento 25/25
+[dataset] teste     semente 5006: via_livre 25/25, obstaculo 25/25, cruzamento 25/25
+[dataset] 500 frames em 389 s: via_livre 167, obstaculo 167, cruzamento 166
+[dataset]   treino    {'via_livre': 117, 'obstaculo': 117, 'cruzamento': 116} (26 episodios com frames)
+[dataset]   validacao {'via_livre': 25, 'obstaculo': 25, 'cruzamento': 25} (9 episodios com frames)
+[dataset]   teste     {'via_livre': 25, 'obstaculo': 25, 'cruzamento': 25} (7 episodios com frames)
+[dataset] obstaculos: {'cena': 8, 'colocado': 159}; colocados por tipo: {'barreira': 36, 'cones': 46, 'triangulo': 45, 'veiculo': 32}
+[dataset] saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset (manifesto.csv), /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset_amostras.jpg e dataset_resumo.json
+
+[tp4_extras] ===== cnn =====
+[cnn] TensorFlow 2.21.0, dispositivo: CPU (nenhuma GPU encontrada pelo TensorFlow)
+[cnn] dataset /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset: treino 350, validacao 75, teste 75
+[cnn] ===== sem_augmentation: 60 epocas, lote 32 =====
+[cnn] ===== com_augmentation: 60 epocas, lote 32 =====
+
+CNN de estados da via (MetaDrive) - com e sem data augmentation
+dataset: /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset (treino 350, validacao 75, teste 75 frames; classes via_livre, obstaculo, cruzamento)
+rede: 1061603 parametros; entrada 90x160; 60 epocas; lote 32; Adam 0.0003; dispositivo: CPU (nenhuma GPU encontrada pelo TensorFlow); TensorFlow 2.21.0
+augmentation: rotacao +-15 graus, zoom 0.2, flip horizontal
+
+avaliacao com os pesos da epoca de maior accuracy de validacao:
+  sem augmentation  epoca 18 | accuracy treino 0.986, validacao 0.987, teste 0.813, teste perturbado 0.667 | loss validacao 0.097, teste 0.600 | gap treino-validacao -0.001, treino-teste +0.172 | 114 s
+  com augmentation  epoca 39 | accuracy treino 0.886, validacao 0.987, teste 0.867, teste perturbado 0.787 | loss validacao 0.145, teste 0.728 | gap treino-validacao -0.101, treino-teste +0.019 | 83 s
+
+media das 5 ultimas epocas (curvas): accuracy de validacao 0.963 sem e 0.773 com; loss de validacao 0.151 sem e 1.071 com
+
+efeito da augmentation (com - sem): accuracy no teste +0.053; accuracy no teste perturbado +0.120; accuracy na validacao +0.000; loss no teste +0.127; gap treino-validacao -0.100; gap treino-teste -0.153; loss de validacao no fim do treino +0.920
+teste perturbado = os frames de teste com rotacao de +-15 graus, zoom de 0.2 e flip horizontal sorteados uma vez (semente 1042)
+matriz de confusao no teste (linhas = classe real, colunas = prevista; via_livre, obstaculo, cruzamento):
+  sem augmentation: [[18, 3, 4], [5, 19, 1], [1, 0, 24]]
+  com augmentation: [[17, 4, 4], [1, 24, 0], [1, 0, 24]]
+
+[cnn] saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/cnn
+
+[tp4_extras] saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras:
+   ros2_ws/log/tp4_extras/faixas/faixas_etapas.jpg
+   ros2_ws/log/tp4_extras/faixas/faixas_resumo.json
+   ros2_ws/log/tp4_extras/formas/formas_etapas.jpg
+   ros2_ws/log/tp4_extras/formas/formas_resumo.json
+   ros2_ws/log/tp4_extras/dataset/manifesto.csv
+   ros2_ws/log/tp4_extras/dataset_amostras.jpg
+   ros2_ws/log/tp4_extras/dataset_resumo.json
+   ros2_ws/log/tp4_extras/cnn/cnn_curvas.png
+   ros2_ws/log/tp4_extras/cnn/cnn_resumo.txt
+   ros2_ws/log/tp4_extras/cnn/cnn_resumo.json
+   ros2_ws/log/tp4_extras/cnn/cnn_sem_augmentation.keras
+   ros2_ws/log/tp4_extras/cnn/cnn_com_augmentation.keras
+[tp4_extras] concluido
+
+### ./scripts/reproduzir_tp4_extras.sh cnn  (mesmo clone, com a placa NVIDIA: o script instala o extra and-cuda; 95 s, venv 7,3 GB)
+[tp4_extras] placa NVIDIA encontrada: instalando as bibliotecas CUDA do TensorFlow (~4 GB)
+
+[tp4_extras] ===== cnn =====
+[cnn] TensorFlow 2.21.0, dispositivo: GPU (NVIDIA GeForce RTX 4070 Ti SUPER)
+[cnn] dataset /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset: treino 350, validacao 75, teste 75
+[cnn] ===== sem_augmentation: 60 epocas, lote 32 =====
+[cnn] ===== com_augmentation: 60 epocas, lote 32 =====
+
+CNN de estados da via (MetaDrive) - com e sem data augmentation
+dataset: /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/dataset (treino 350, validacao 75, teste 75 frames; classes via_livre, obstaculo, cruzamento)
+rede: 1061603 parametros; entrada 90x160; 60 epocas; lote 32; Adam 0.0003; dispositivo: GPU (NVIDIA GeForce RTX 4070 Ti SUPER); TensorFlow 2.21.0
+augmentation: rotacao +-15 graus, zoom 0.2, flip horizontal
+
+avaliacao com os pesos da epoca de maior accuracy de validacao:
+  sem augmentation  epoca 26 | accuracy treino 1.000, validacao 0.973, teste 0.827, teste perturbado 0.640 | loss validacao 0.087, teste 0.564 | gap treino-validacao +0.027, treino-teste +0.173 | 27 s
+  com augmentation  epoca 60 | accuracy treino 0.897, validacao 0.973, teste 0.880, teste perturbado 0.827 | loss validacao 0.140, teste 1.018 | gap treino-validacao -0.076, treino-teste +0.017 | 30 s
+
+media das 5 ultimas epocas (curvas): accuracy de validacao 0.960 sem e 0.787 com; loss de validacao 0.156 sem e 0.559 com
+
+efeito da augmentation (com - sem): accuracy no teste +0.053; accuracy no teste perturbado +0.187; accuracy na validacao +0.000; loss no teste +0.455; gap treino-validacao -0.103; gap treino-teste -0.156; loss de validacao no fim do treino +0.402
+teste perturbado = os frames de teste com rotacao de +-15 graus, zoom de 0.2 e flip horizontal sorteados uma vez (semente 1042)
+matriz de confusao no teste (linhas = classe real, colunas = prevista; via_livre, obstaculo, cruzamento):
+  sem augmentation: [[18, 3, 4], [6, 19, 0], [0, 0, 25]]
+  com augmentation: [[17, 4, 4], [1, 24, 0], [0, 0, 25]]
+
+[cnn] saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras/cnn
+
+[tp4_extras] saidas em /home/rmv/tp4_extras_clone/ros2_ws/log/tp4_extras:
+   ros2_ws/log/tp4_extras/faixas/faixas_etapas.jpg
+   ros2_ws/log/tp4_extras/faixas/faixas_resumo.json
+   ros2_ws/log/tp4_extras/formas/formas_etapas.jpg
+   ros2_ws/log/tp4_extras/formas/formas_resumo.json
+   ros2_ws/log/tp4_extras/dataset/manifesto.csv
+   ros2_ws/log/tp4_extras/dataset_amostras.jpg
+   ros2_ws/log/tp4_extras/dataset_resumo.json
+   ros2_ws/log/tp4_extras/cnn/cnn_curvas.png
+   ros2_ws/log/tp4_extras/cnn/cnn_resumo.txt
+   ros2_ws/log/tp4_extras/cnn/cnn_resumo.json
+   ros2_ws/log/tp4_extras/cnn/cnn_sem_augmentation.keras
+   ros2_ws/log/tp4_extras/cnn/cnn_com_augmentation.keras
+[tp4_extras] concluido

@@ -1,0 +1,12 @@
+# Parametros da navegacao (TP4): valem para os nos do projeto lancados pelo navegacao.launch.py,
+# por cima do config/params.yaml. O relogio e o do Gazebo (/clock), por isso use_sim_time em
+# todos: a espera de 2 s da behavior tree e os tempos da patrulha contam em tempo simulado.
+# (Os parametros do Nav2 ficam em config/nav2.yaml.)
+/**:
+  ros__parameters:
+    use_sim_time: true
+
+# A camera e a do Gazebo (640x480 a 15 Hz); o rastreador divide a CPU com o simulador e o Nav2.
+/rastreador_yolo:
+  ros__parameters:
+    frequencia_hz: 5.0

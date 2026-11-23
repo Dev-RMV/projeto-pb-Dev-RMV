@@ -1,0 +1,6 @@
+data_hora,volta,posto,x,y,yaw_graus,status,tentativas,duracao_s,erro_posicao_m,erro_yaw_graus,recuperacoes,engajou,disparou,tempo_ate_disparo_s
+2026-11-23T07:58:54,1,posto_alvo_2,1.3,-1.61,23.0,SUCESSO,1,14.8,0.211,8.6,0,True,True,1.1
+2026-11-23T07:59:12,1,posto_alvo_1,0.7,0.3,0.0,SUCESSO,1,14.1,0.255,-8.6,0,True,True,0.5
+2026-11-23T07:59:26,1,posto_alvo_3,1.44,1.6,0.0,SUCESSO,1,11.6,0.153,-7.9,0,True,True,0.7
+2026-11-23T07:59:46,1,vigia_oeste,-0.8,0.8,180.0,SUCESSO,1,17.0,0.218,5.0,0,False,False,
+2026-11-23T07:59:58,1,base,0.0,0.0,0.0,SUCESSO,1,10.1,0.17,8.0,0,False,False,
